@@ -1,13 +1,28 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { setVermogen } from "@/lib/data";
-import type { Vermogen } from "@/lib/types";
+import { setBesteedbaarVermogen, setOverigVermogen } from "@/lib/data";
+import type { BesteedbaarVermogen, OverigVermogen } from "@/lib/types";
 
-export async function saveVermogen(formData: FormData): Promise<void> {
-  const data: Vermogen = {
+export async function saveBesteedbaarVermogen(
+  formData: FormData
+): Promise<void> {
+  const nu = new Date();
+
+  const data: BesteedbaarVermogen = {
+    jaar: nu.getFullYear(),
+    maand: nu.getMonth() + 1,
     spaarrekening: Number(formData.get("spaarrekening") || 0),
     belegging: Number(formData.get("belegging") || 0),
+  };
+
+  await setBesteedbaarVermogen(data);
+  revalidatePath("/vermogen");
+  revalidatePath("/");
+}
+
+export async function saveOverigVermogen(formData: FormData): Promise<void> {
+  const data: OverigVermogen = {
     aandelenPaytWaarde: Number(formData.get("aandelenPaytWaarde") || 0),
     huisWaarde: Number(formData.get("huisWaarde") || 0),
     hypotheek: Number(formData.get("hypotheek") || 0),
@@ -16,7 +31,7 @@ export async function saveVermogen(formData: FormData): Promise<void> {
     bijgewerktOp: new Date().toISOString().slice(0, 10),
   };
 
-  await setVermogen(data);
+  await setOverigVermogen(data);
   revalidatePath("/vermogen");
   revalidatePath("/");
 }

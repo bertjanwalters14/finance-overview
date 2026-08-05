@@ -1,7 +1,8 @@
 import { kvGet, kvSet, kvKeys } from './kv'
 import type {
   Maand,
-  Vermogen,
+  BesteedbaarVermogen,
+  OverigVermogen,
   AandelenPaytData,
   LoonEntry,
   JaarDoelen,
@@ -30,14 +31,41 @@ export async function listMaandenVanJaar(jaar: number): Promise<Maand[]> {
     .sort((a, b) => a.maand - b.maand)
 }
 
-const VERMOGEN_KEY = 'vermogen:huidig'
-
-export async function getVermogen(): Promise<Vermogen | null> {
-  return kvGet<Vermogen>(VERMOGEN_KEY)
+function besteedbaarVermogenKey(jaar: number, maand: number) {
+  return `vermogen:besteedbaar:${jaar}:${String(maand).padStart(2, '0')}`
 }
 
-export async function setVermogen(data: Vermogen): Promise<void> {
-  await kvSet(VERMOGEN_KEY, data)
+export async function setBesteedbaarVermogen(
+  data: BesteedbaarVermogen
+): Promise<void> {
+  await kvSet(besteedbaarVermogenKey(data.jaar, data.maand), data)
+}
+
+export async function listBesteedbaarVermogenGeschiedenis(): Promise<
+  BesteedbaarVermogen[]
+> {
+  const keys = await kvKeys('vermogen:besteedbaar:')
+  const punten = await Promise.all(
+    keys.map((k) => kvGet<BesteedbaarVermogen>(k))
+  )
+  return punten
+    .filter((p): p is BesteedbaarVermogen => p !== null)
+    .sort((a, b) => a.jaar - b.jaar || a.maand - b.maand)
+}
+
+export async function getLaatsteBesteedbaarVermogen(): Promise<BesteedbaarVermogen | null> {
+  const geschiedenis = await listBesteedbaarVermogenGeschiedenis()
+  return geschiedenis.at(-1) ?? null
+}
+
+const OVERIG_VERMOGEN_KEY = 'vermogen:overig'
+
+export async function getOverigVermogen(): Promise<OverigVermogen | null> {
+  return kvGet<OverigVermogen>(OVERIG_VERMOGEN_KEY)
+}
+
+export async function setOverigVermogen(data: OverigVermogen): Promise<void> {
+  await kvSet(OVERIG_VERMOGEN_KEY, data)
 }
 
 const AANDELEN_KEY = 'aandelenPayt'

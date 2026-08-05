@@ -1,20 +1,14 @@
 "use client";
 
-import { saveVermogen } from "./actions";
+import { saveOverigVermogen } from "./actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { inputClass } from "@/components/formStyles";
-import type { Vermogen } from "@/lib/types";
+import type { OverigVermogen } from "@/lib/types";
 
-export function VermogenForm({ data }: { data: Vermogen | null }) {
+export function OverigVermogenForm({ data }: { data: OverigVermogen | null }) {
   return (
-    <form action={saveVermogen} className="flex flex-col gap-4">
+    <form action={saveOverigVermogen} className="flex flex-col gap-4">
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field
-          label="Spaarrekening"
-          name="spaarrekening"
-          defaultValue={data?.spaarrekening}
-        />
-        <Field label="Belegging" name="belegging" defaultValue={data?.belegging} />
         <Field
           label="Payt aandelen waarde"
           name="aandelenPaytWaarde"

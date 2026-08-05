@@ -421,9 +421,13 @@
       "beleggingInleg": 1000.0
     }
   ],
-  "vermogen": {
+  "besteedbaarVermogen": {
+    "jaar": 2026,
+    "maand": 8,
     "spaarrekening": 21296.0,
-    "belegging": 12292.0,
+    "belegging": 12292.0
+  },
+  "overigVermogen": {
     "aandelenPaytWaarde": 130082.75,
     "huisWaarde": 825000.0,
     "hypotheek": 475000.0,

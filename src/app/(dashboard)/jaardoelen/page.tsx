@@ -1,6 +1,7 @@
 import { getDoelen, listDoelenJaren } from "@/lib/data";
 import { Card } from "@/components/Card";
 import { YearSwitcher } from "@/components/YearSwitcher";
+import { ExportLink } from "@/components/ExportLink";
 import { DoelenChart } from "./DoelenChart";
 import { DoelenForm } from "./DoelenForm";
 
@@ -24,9 +25,12 @@ export default async function JaardoelenPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-y-2">
         <h1 className="text-2xl font-semibold text-white">Jaardoelen</h1>
-        <YearSwitcher jaar={jaar} jaren={jaren} basePath="/jaardoelen" />
+        <div className="flex items-center gap-4">
+          <ExportLink href={`/api/export/jaardoelen?jaar=${jaar}`} />
+          <YearSwitcher jaar={jaar} jaren={jaren} basePath="/jaardoelen" />
+        </div>
       </div>
 
       <Card title={`Doel vs werkelijk ${jaar}`}>

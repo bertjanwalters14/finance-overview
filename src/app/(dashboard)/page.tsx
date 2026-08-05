@@ -1,4 +1,9 @@
-import { getVermogen, getMaand, getDoelen } from "@/lib/data";
+import {
+  getLaatsteBesteedbaarVermogen,
+  getOverigVermogen,
+  getMaand,
+  getDoelen,
+} from "@/lib/data";
 import { berekenEigenVermogen, MAAND_NAMEN } from "@/lib/types";
 import { formatEUR, formatEURPrecies } from "@/lib/format";
 import { Card } from "@/components/Card";
@@ -8,13 +13,15 @@ export default async function DashboardPage() {
   const jaar = nu.getFullYear();
   const maandNr = nu.getMonth() + 1;
 
-  const [vermogen, maand, doelen] = await Promise.all([
-    getVermogen(),
+  const [besteedbaar, overig, maand, doelen] = await Promise.all([
+    getLaatsteBesteedbaarVermogen(),
+    getOverigVermogen(),
     getMaand(jaar, maandNr),
     getDoelen(jaar),
   ]);
 
-  const eigenVermogen = vermogen ? berekenEigenVermogen(vermogen) : null;
+  const eigenVermogen =
+    besteedbaar && overig ? berekenEigenVermogen(besteedbaar, overig) : null;
 
   const vasteLastenTotaal =
     maand?.vasteLasten.reduce((s, v) => s + v.bedrag, 0) ?? 0;
@@ -32,23 +39,23 @@ export default async function DashboardPage() {
 
       <div className="grid gap-6 sm:grid-cols-2">
         <Card title="Eigen vermogen">
-          {vermogen && eigenVermogen !== null ? (
+          {besteedbaar && overig && eigenVermogen !== null ? (
             <>
               <p className="mb-4 text-3xl font-semibold text-white">
                 {formatEUR(eigenVermogen)}
               </p>
               <dl className="space-y-1 text-sm">
-                <Row label="Spaarrekening" value={vermogen.spaarrekening} />
-                <Row label="Belegging" value={vermogen.belegging} />
-                <Row label="Payt aandelen" value={vermogen.aandelenPaytWaarde} />
+                <Row label="Spaarrekening" value={besteedbaar.spaarrekening} />
+                <Row label="Belegging" value={besteedbaar.belegging} />
+                <Row label="Payt aandelen" value={overig.aandelenPaytWaarde} />
                 <Row
                   label="Overwaarde (jouw deel)"
-                  value={vermogen.overwaardeAandeel}
+                  value={overig.overwaardeAandeel}
                 />
-                <Row label="Schuld" value={-vermogen.schuld} />
+                <Row label="Schuld" value={-overig.schuld} />
               </dl>
               <p className="mt-3 text-xs text-slate-500">
-                Bijgewerkt op {vermogen.bijgewerktOp}
+                Overig vermogen bijgewerkt op {overig.bijgewerktOp}
               </p>
             </>
           ) : (

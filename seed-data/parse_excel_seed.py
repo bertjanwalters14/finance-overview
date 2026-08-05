@@ -37,7 +37,8 @@ wb = openpyxl.load_workbook(XLSX_PATH, data_only=True)
 
 seed = {
     "maanden": [],
-    "vermogen": None,
+    "besteedbaarVermogen": None,
+    "overigVermogen": None,
     "aandelenPayt": {"koersPerAandeel": 0, "aandeelhouders": []},
     "loonontwikkeling": [],
     "doelen": [],
@@ -115,9 +116,14 @@ hypotheek = float(cell(fin, 28, 2))
 overwaarde_aandeel = float(cell(fin, 29, 3))
 schuld = float(cell(fin, 33, 2))
 
-seed["vermogen"] = {
+seed["besteedbaarVermogen"] = {
+    "jaar": HUIDIG_JAAR,
+    "maand": 8,
     "spaarrekening": spaarrekening,
     "belegging": belegging_totaal,
+}
+
+seed["overigVermogen"] = {
     "aandelenPaytWaarde": aandelen_payt_waarde,
     "huisWaarde": huis_waarde,
     "hypotheek": hypotheek,

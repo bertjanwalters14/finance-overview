@@ -3,6 +3,7 @@ import { listMaandenVanJaar, getMaand } from "@/lib/data";
 import { MAAND_NAMEN } from "@/lib/types";
 import { Card } from "@/components/Card";
 import { YearSwitcher } from "@/components/YearSwitcher";
+import { ExportLink } from "@/components/ExportLink";
 import { formatEURPrecies } from "@/lib/format";
 import { MaandForm } from "./MaandForm";
 
@@ -26,9 +27,12 @@ export default async function MaandoverzichtPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-y-2">
         <h1 className="text-2xl font-semibold text-white">Maandoverzicht</h1>
-        <YearSwitcher jaar={jaar} jaren={JAREN} basePath="/maandoverzicht" />
+        <div className="flex items-center gap-4">
+          <ExportLink href={`/api/export/maandoverzicht?jaar=${jaar}`} />
+          <YearSwitcher jaar={jaar} jaren={JAREN} basePath="/maandoverzicht" />
+        </div>
       </div>
 
       <Card title={`${MAAND_NAMEN[maandNr - 1]} ${jaar} bewerken`}>

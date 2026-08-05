@@ -14,9 +14,22 @@ export interface Maand {
   beleggingInleg: number
 }
 
-export interface Vermogen {
+// Besteedbaar vermogen (spaarrekening + belegging) schommelt vaak en wordt
+// per kalendermaand gehistoriseerd, zodat je een trend kunt zien.
+export interface BesteedbaarVermogen {
+  jaar: number
+  maand: number
   spaarrekening: number
   belegging: number
+}
+
+export function besteedbaarVermogenTotaal(b: BesteedbaarVermogen): number {
+  return b.spaarrekening + b.belegging
+}
+
+// Overig vermogen (huis, hypotheek, Payt-aandelen, schuld) verandert zelden,
+// dus dit is één losse "huidige stand" zonder historie.
+export interface OverigVermogen {
   aandelenPaytWaarde: number
   huisWaarde: number
   hypotheek: number
@@ -27,14 +40,15 @@ export interface Vermogen {
   bijgewerktOp: string
 }
 
-// eigenVermogen = spaarrekening + belegging + aandelenPaytWaarde + overwaardeAandeel - schuld
-export function berekenEigenVermogen(v: Vermogen): number {
+export function berekenEigenVermogen(
+  besteedbaar: BesteedbaarVermogen,
+  overig: OverigVermogen
+): number {
   return (
-    v.spaarrekening +
-    v.belegging +
-    v.aandelenPaytWaarde +
-    v.overwaardeAandeel -
-    v.schuld
+    besteedbaarVermogenTotaal(besteedbaar) +
+    overig.aandelenPaytWaarde +
+    overig.overwaardeAandeel -
+    overig.schuld
   )
 }
 

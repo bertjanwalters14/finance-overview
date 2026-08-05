@@ -35,7 +35,9 @@ const entries = []
 for (const maand of seed.maanden) {
   entries.push([`maand:${maand.jaar}:${String(maand.maand).padStart(2, '0')}`, maand])
 }
-entries.push(['vermogen:huidig', seed.vermogen])
+const bv = seed.besteedbaarVermogen
+entries.push([`vermogen:besteedbaar:${bv.jaar}:${String(bv.maand).padStart(2, '0')}`, bv])
+entries.push(['vermogen:overig', seed.overigVermogen])
 entries.push(['aandelenPayt', seed.aandelenPayt])
 entries.push(['loonontwikkeling', seed.loonontwikkeling])
 for (const doelen of seed.doelen) {

@@ -57,7 +57,7 @@ export function MaandForm({
                 name="vasteLastNaam"
                 defaultValue={v.naam}
                 placeholder="Naam"
-                className={`${inputClass} flex-1`}
+                className={`${inputClass} min-w-0 flex-1`}
               />
               <input
                 name="vasteLastBedrag"
@@ -65,7 +65,7 @@ export function MaandForm({
                 step="0.01"
                 defaultValue={v.bedrag}
                 placeholder="Bedrag"
-                className={`${inputClass} w-32`}
+                className={`${inputClass} w-24 shrink-0 sm:w-32`}
               />
               <button
                 type="button"

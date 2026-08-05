@@ -1,6 +1,7 @@
 import { getAandelenPayt } from "@/lib/data";
 import { berekenAandelenWaarde } from "@/lib/types";
 import { Card } from "@/components/Card";
+import { ExportLink } from "@/components/ExportLink";
 import { formatEURPrecies } from "@/lib/format";
 import { AandelenForm } from "./AandelenForm";
 
@@ -15,7 +16,10 @@ export default async function AandelenPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold text-white">Aandelen Payt</h1>
+      <div className="flex flex-wrap items-center justify-between gap-y-2">
+        <h1 className="text-2xl font-semibold text-white">Aandelen Payt</h1>
+        <ExportLink href="/api/export/aandelen" />
+      </div>
 
       <div className="grid gap-6 sm:grid-cols-2">
         <Card title="Totale waarde">
