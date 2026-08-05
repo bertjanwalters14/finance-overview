@@ -36,6 +36,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# local dev data store (fallback when no Upstash credentials set)
+/.data
+seed-data/*.xlsx
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
