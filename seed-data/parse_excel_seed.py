@@ -38,7 +38,7 @@ wb = openpyxl.load_workbook(XLSX_PATH, data_only=True)
 seed = {
     "maanden": [],
     "vermogen": None,
-    "aandelenPayt": [],
+    "aandelenPayt": {"koersPerAandeel": 0, "aandeelhouders": []},
     "loonontwikkeling": [],
     "doelen": [],
 }
@@ -127,18 +127,19 @@ seed["vermogen"] = {
 }
 
 # --- Aandelen Payt sheet ---
+# "Waarde" en "Rendement" worden in de app live doorberekend vanuit aantal x
+# koersPerAandeel, dus die twee kolommen worden hier niet meer overgenomen.
 aandelen = wb["Aandelen Payt"]
+seed["aandelenPayt"]["koersPerAandeel"] = float(cell(aandelen, 8, 2) or 0)
 for row in range(2, 6):
     naam = cell(aandelen, row, 1)
     if not naam:
         continue
-    seed["aandelenPayt"].append(
+    seed["aandelenPayt"]["aandeelhouders"].append(
         {
             "naam": naam,
             "aantal": float(cell(aandelen, row, 2) or 0),
             "inleg": float(cell(aandelen, row, 5) or 0),
-            "waarde": float(cell(aandelen, row, 6) or 0),
-            "rendement": float(cell(aandelen, row, 9) or 0),
             "dividend": float(cell(aandelen, row, 10) or 0),
         }
     )
@@ -245,7 +246,8 @@ print(f"Geschreven: {OUT_PATH}")
 print(f"- {len(seed['maanden'])} maand-records ({HUIDIG_JAAR})")
 print(f"- vermogen snapshot: eigen vermogen check = "
       f"{spaarrekening + belegging_totaal + aandelen_payt_waarde + overwaarde_aandeel - schuld}")
-print(f"- {len(seed['aandelenPayt'])} aandeelhouders")
+print(f"- {len(seed['aandelenPayt']['aandeelhouders'])} aandeelhouders "
+      f"(koers per aandeel: {seed['aandelenPayt']['koersPerAandeel']})")
 print(f"- {len(seed['loonontwikkeling'])} loon-records")
 print(f"- {len(seed['doelen'])} jaren aan doelen: "
       f"{[d['jaar'] for d in seed['doelen']]}")

@@ -42,9 +42,28 @@ export interface AandeelhouderPayt {
   naam: string
   aantal: number
   inleg: number
-  waarde: number
-  rendement: number
   dividend: number
+}
+
+export interface AandelenPaytData {
+  koersPerAandeel: number
+  aandeelhouders: AandeelhouderPayt[]
+}
+
+export function berekenAandelenWaarde(
+  a: AandeelhouderPayt,
+  koersPerAandeel: number
+): number {
+  return a.aantal * koersPerAandeel
+}
+
+// rendement als multiplier (waarde / inleg), bv. 6.28x
+export function berekenRendement(
+  a: AandeelhouderPayt,
+  koersPerAandeel: number
+): number {
+  if (a.inleg === 0) return 0
+  return berekenAandelenWaarde(a, koersPerAandeel) / a.inleg
 }
 
 export interface LoonEntry {

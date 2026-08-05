@@ -2,7 +2,7 @@ import { kvGet, kvSet, kvKeys } from './kv'
 import type {
   Maand,
   Vermogen,
-  AandeelhouderPayt,
+  AandelenPaytData,
   LoonEntry,
   JaarDoelen,
 } from './types'
@@ -42,13 +42,16 @@ export async function setVermogen(data: Vermogen): Promise<void> {
 
 const AANDELEN_KEY = 'aandelenPayt'
 
-export async function getAandelenPayt(): Promise<AandeelhouderPayt[]> {
-  return (await kvGet<AandeelhouderPayt[]>(AANDELEN_KEY)) ?? []
+export async function getAandelenPayt(): Promise<AandelenPaytData> {
+  return (
+    (await kvGet<AandelenPaytData>(AANDELEN_KEY)) ?? {
+      koersPerAandeel: 0,
+      aandeelhouders: [],
+    }
+  )
 }
 
-export async function setAandelenPayt(
-  data: AandeelhouderPayt[]
-): Promise<void> {
+export async function setAandelenPayt(data: AandelenPaytData): Promise<void> {
   await kvSet(AANDELEN_KEY, data)
 }
 

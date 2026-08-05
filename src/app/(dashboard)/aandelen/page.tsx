@@ -1,13 +1,17 @@
 import { getAandelenPayt } from "@/lib/data";
+import { berekenAandelenWaarde } from "@/lib/types";
 import { Card } from "@/components/Card";
 import { formatEURPrecies } from "@/lib/format";
 import { AandelenForm } from "./AandelenForm";
 
 export default async function AandelenPage() {
-  const aandelen = await getAandelenPayt();
+  const data = await getAandelenPayt();
 
-  const totaalWaarde = aandelen.reduce((s, a) => s + a.waarde, 0);
-  const totaalInleg = aandelen.reduce((s, a) => s + a.inleg, 0);
+  const totaalWaarde = data.aandeelhouders.reduce(
+    (s, a) => s + berekenAandelenWaarde(a, data.koersPerAandeel),
+    0
+  );
+  const totaalInleg = data.aandeelhouders.reduce((s, a) => s + a.inleg, 0);
 
   return (
     <div className="flex flex-col gap-6">
@@ -27,7 +31,7 @@ export default async function AandelenPage() {
       </div>
 
       <Card title="Aandeelhouders">
-        <AandelenForm data={aandelen} />
+        <AandelenForm data={data} />
       </Card>
     </div>
   );
