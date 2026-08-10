@@ -67,7 +67,19 @@ export function VermogenChart({
             textAnchor="end"
             height={60}
           />
-          <YAxis stroke="#94a3b8" fontSize={12} />
+          <YAxis
+            yAxisId="besteedbaar"
+            stroke="#10b981"
+            fontSize={12}
+            width={70}
+          />
+          <YAxis
+            yAxisId="nietBesteedbaar"
+            orientation="right"
+            stroke="#818cf8"
+            fontSize={12}
+            width={70}
+          />
           <Tooltip
             contentStyle={{
               background: "#0f172a",
@@ -77,6 +89,7 @@ export function VermogenChart({
           />
           <Legend />
           <Line
+            yAxisId="besteedbaar"
             type="monotone"
             dataKey="Besteedbaar"
             stroke="#10b981"
@@ -85,12 +98,13 @@ export function VermogenChart({
             connectNulls={false}
           />
           <Line
+            yAxisId="nietBesteedbaar"
             type="monotone"
             dataKey="Niet-besteedbaar"
             stroke="#818cf8"
             strokeWidth={2}
             dot={{ r: 3 }}
-            connectNulls={false}
+            connectNulls
           />
         </LineChart>
       </ResponsiveContainer>
