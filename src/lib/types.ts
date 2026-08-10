@@ -26,8 +26,10 @@ export interface InkomstenVerhouding {
 // geen echte automatische overboeking — die post negeren we hier dus
 // volledig (telt niet als vaste last, en ook niet als sparen). Belegging
 // inleg is een los/gepland cijfer, geen maandelijkse uitgave, en telt hier
-// dus ook niet mee. Sparen % is puur "werkelijk gespaard", wat je pas aan
-// het einde van de maand invult.
+// dus ook niet mee. Sparen % gebruikt het maanddoel (doelSparen), niet
+// "werkelijk gespaard" — dat laatste vul je pas aan het einde van de maand
+// in en staat dus het grootste deel van de maand nog op 0, terwijl het
+// doel juist leidend is voor hoe je inkomen die maand verdeeld is.
 function isSpaarPost(v: VasteLast): boolean {
   return v.naam.trim().toLowerCase() === 'sparen'
 }
@@ -37,7 +39,7 @@ export function berekenInkomstenVerhouding(m: Maand): InkomstenVerhouding {
   const vasteLasten = m.vasteLasten
     .filter((v) => !isSpaarPost(v))
     .reduce((s, v) => s + v.bedrag, 0)
-  const sparen = m.werkelijkGespaard
+  const sparen = m.doelSparen
 
   if (inkomsten <= 0) {
     return { vasteLastenPercentage: 0, sparenPercentage: 0, overigPercentage: 0 }
