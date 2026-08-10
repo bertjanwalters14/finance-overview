@@ -37,7 +37,8 @@ export default async function DashboardPage() {
 
   const vasteLastenBedrag = maand ? vasteLastenTotaal(maand) : 0;
   const inkomstenTotaal = (maand?.loon ?? 0) + (maand?.overigeInkomsten ?? 0);
-  const overNaVasteLasten = inkomstenTotaal - vasteLastenBedrag;
+  const overNaVasteLasten =
+    inkomstenTotaal - vasteLastenBedrag - (maand?.doelSparen ?? 0);
 
   const verhouding = maand ? berekenInkomstenVerhouding(maand) : null;
   const vasteLastenBreedte = verhouding
