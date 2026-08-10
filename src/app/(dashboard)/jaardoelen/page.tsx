@@ -1,48 +1,12 @@
-import { getDoelen, listDoelenJaren } from "@/lib/data";
-import { Card } from "@/components/Card";
-import { YearSwitcher } from "@/components/YearSwitcher";
-import { ExportLink } from "@/components/ExportLink";
-import { DoelenChart } from "./DoelenChart";
-import { DoelenForm } from "./DoelenForm";
+import { redirect } from "next/navigation";
 
-export default async function JaardoelenPage({
+export default async function JaardoelenRedirect({
   searchParams,
 }: {
   searchParams: Promise<{ jaar?: string }>;
 }) {
   const sp = await searchParams;
-  const nu = new Date();
-  const jaar = Number(sp.jaar) || nu.getFullYear();
-
-  const [doelen, beschikbareJaren] = await Promise.all([
-    getDoelen(jaar),
-    listDoelenJaren(),
-  ]);
-
-  const jaren = Array.from(
-    new Set([...beschikbareJaren, nu.getFullYear(), nu.getFullYear() + 1])
-  ).sort((a, b) => b - a);
-
-  return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-y-2">
-        <h1 className="text-2xl font-semibold text-white">Jaardoelen</h1>
-        <div className="flex items-center gap-4">
-          <ExportLink href={`/api/export/jaardoelen?jaar=${jaar}`} />
-          <YearSwitcher jaar={jaar} jaren={jaren} basePath="/jaardoelen" />
-        </div>
-      </div>
-
-      <Card title={`Doel vs werkelijk ${jaar}`}>
-        <DoelenChart
-          doelPerMaand={doelen?.doelPerMaand ?? Array(12).fill(0)}
-          werkelijkPerMaand={doelen?.werkelijkPerMaand ?? Array(12).fill(0)}
-        />
-      </Card>
-
-      <Card title={`Doelen ${jaar} bewerken`}>
-        <DoelenForm jaar={jaar} data={doelen} />
-      </Card>
-    </div>
-  );
+  const params = new URLSearchParams({ tab: "maanden" });
+  if (sp.jaar) params.set("jaar", sp.jaar);
+  redirect(`/jaaroverzicht?${params.toString()}`);
 }

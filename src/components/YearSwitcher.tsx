@@ -7,17 +7,23 @@ export function YearSwitcher({
   jaar,
   jaren,
   basePath,
+  extraParams,
 }: {
   jaar: number;
   jaren: number[];
   basePath: string;
+  extraParams?: Record<string, string>;
 }) {
   const router = useRouter();
 
   return (
     <select
       value={jaar}
-      onChange={(e) => router.push(`${basePath}?jaar=${e.target.value}`)}
+      onChange={(e) => {
+        const params = new URLSearchParams(extraParams);
+        params.set("jaar", e.target.value);
+        router.push(`${basePath}?${params.toString()}`);
+      }}
       className={`${inputClass} w-28`}
     >
       {jaren.map((j) => (

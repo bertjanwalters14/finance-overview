@@ -6,7 +6,12 @@ import {
 } from "@/lib/data";
 import { besteedbaarVermogenTotaal, vasteLastenTotaal } from "@/lib/types";
 import { Card } from "@/components/Card";
+import { Tabs } from "@/components/Tabs";
+import { YearSwitcher } from "@/components/YearSwitcher";
+import { ExportLink } from "@/components/ExportLink";
 import { formatEUR } from "@/lib/format";
+import { DoelenChart } from "./DoelenChart";
+import { DoelenForm } from "./DoelenForm";
 
 interface JaarRij {
   jaar: number;
@@ -17,7 +22,33 @@ interface JaarRij {
   vermogensgroei: number | null;
 }
 
-export default async function JaaroverzichtPage() {
+export default async function JaaroverzichtPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string; jaar?: string }>;
+}) {
+  const sp = await searchParams;
+  const tab = sp.tab === "maanden" ? "maanden" : "jaren";
+
+  return (
+    <div className="flex flex-col gap-6">
+      <h1 className="text-2xl font-semibold text-white">Jaaroverzicht</h1>
+
+      <Tabs
+        basePath="/jaaroverzicht"
+        actief={tab}
+        tabs={[
+          { value: "jaren", label: "Jaren vergelijken" },
+          { value: "maanden", label: "Per maand" },
+        ]}
+      />
+
+      {tab === "jaren" ? <JarenVergelekenTab /> : <PerMaandTab jaarParam={sp.jaar} />}
+    </div>
+  );
+}
+
+async function JarenVergelekenTab() {
   const jaren = (await listDoelenJaren()).sort((a, b) => a - b);
   const besteedbaarHistorie = await listBesteedbaarVermogenGeschiedenis();
 
@@ -78,72 +109,107 @@ export default async function JaaroverzichtPage() {
   );
 
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold text-white">Jaaroverzicht</h1>
+    <Card title="Jaren vergeleken">
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-left text-slate-400">
+              <th className="pr-4 pb-2">Jaar</th>
+              <th className="pr-4 pb-2 text-right">Doel gespaard</th>
+              <th className="pr-4 pb-2 text-right">Werkelijk gespaard</th>
+              <th className="pr-4 pb-2 text-right">Inkomsten</th>
+              <th className="pr-4 pb-2 text-right">Vaste lasten</th>
+              <th className="pr-4 pb-2 text-right">Vermogensgroei</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rijen.map((r, i) => {
+              const vorige = i > 0 ? rijen[i - 1] : null;
+              return (
+                <tr key={r.jaar} className="border-t border-slate-800">
+                  <td className="py-2 font-medium text-slate-200">{r.jaar}</td>
+                  <td className="py-2 pr-4 text-right text-slate-300">
+                    {formatEUR(r.doelTotaal)}
+                  </td>
+                  <td className="py-2 pr-4 text-right text-slate-300">
+                    {formatEUR(r.werkelijkTotaal)}
+                    <Delta
+                      huidig={r.werkelijkTotaal}
+                      vorig={vorige?.werkelijkTotaal ?? null}
+                    />
+                  </td>
+                  <td className="py-2 pr-4 text-right text-slate-300">
+                    {r.inkomstenTotaal !== null
+                      ? formatEUR(r.inkomstenTotaal)
+                      : "—"}
+                  </td>
+                  <td className="py-2 pr-4 text-right text-slate-300">
+                    {r.vasteLastenTotaal !== null
+                      ? formatEUR(r.vasteLastenTotaal)
+                      : "—"}
+                  </td>
+                  <td className="py-2 pr-4 text-right text-slate-300">
+                    {r.vermogensgroei !== null
+                      ? formatEUR(r.vermogensgroei)
+                      : "—"}
+                    <Delta
+                      huidig={r.vermogensgroei}
+                      vorig={vorige?.vermogensgroei ?? null}
+                    />
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-4 text-xs text-slate-500">
+        Werkelijk gespaard is sparen + alle categorieën samen (belegging,
+        vakantie, etc.). Inkomsten/vaste lasten zijn alleen bekend vanaf het
+        jaar waarin je het maandoverzicht bent gaan bijhouden. Vermogensgroei
+        toont alleen een waarde als er minstens 2
+        besteedbaar-vermogen-punten in dat jaar bekend zijn.
+      </p>
+    </Card>
+  );
+}
 
-      <Card title="Jaren vergeleken">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-slate-400">
-                <th className="pr-4 pb-2">Jaar</th>
-                <th className="pr-4 pb-2 text-right">Doel gespaard</th>
-                <th className="pr-4 pb-2 text-right">Werkelijk gespaard</th>
-                <th className="pr-4 pb-2 text-right">Inkomsten</th>
-                <th className="pr-4 pb-2 text-right">Vaste lasten</th>
-                <th className="pr-4 pb-2 text-right">Vermogensgroei</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rijen.map((r, i) => {
-                const vorige = i > 0 ? rijen[i - 1] : null;
-                return (
-                  <tr key={r.jaar} className="border-t border-slate-800">
-                    <td className="py-2 font-medium text-slate-200">
-                      {r.jaar}
-                    </td>
-                    <td className="py-2 pr-4 text-right text-slate-300">
-                      {formatEUR(r.doelTotaal)}
-                    </td>
-                    <td className="py-2 pr-4 text-right text-slate-300">
-                      {formatEUR(r.werkelijkTotaal)}
-                      <Delta
-                        huidig={r.werkelijkTotaal}
-                        vorig={vorige?.werkelijkTotaal ?? null}
-                      />
-                    </td>
-                    <td className="py-2 pr-4 text-right text-slate-300">
-                      {r.inkomstenTotaal !== null
-                        ? formatEUR(r.inkomstenTotaal)
-                        : "—"}
-                    </td>
-                    <td className="py-2 pr-4 text-right text-slate-300">
-                      {r.vasteLastenTotaal !== null
-                        ? formatEUR(r.vasteLastenTotaal)
-                        : "—"}
-                    </td>
-                    <td className="py-2 pr-4 text-right text-slate-300">
-                      {r.vermogensgroei !== null
-                        ? formatEUR(r.vermogensgroei)
-                        : "—"}
-                      <Delta
-                        huidig={r.vermogensgroei}
-                        vorig={vorige?.vermogensgroei ?? null}
-                      />
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+async function PerMaandTab({ jaarParam }: { jaarParam?: string }) {
+  const nu = new Date();
+  const jaar = Number(jaarParam) || nu.getFullYear();
+
+  const [doelen, beschikbareJaren] = await Promise.all([
+    getDoelen(jaar),
+    listDoelenJaren(),
+  ]);
+
+  const jaren = Array.from(
+    new Set([...beschikbareJaren, nu.getFullYear(), nu.getFullYear() + 1])
+  ).sort((a, b) => b - a);
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-wrap items-center justify-between gap-y-2">
+        <div className="flex items-center gap-4">
+          <ExportLink href={`/api/export/jaardoelen?jaar=${jaar}`} />
         </div>
-        <p className="mt-4 text-xs text-slate-500">
-          Werkelijk gespaard is sparen + alle categorieën samen (belegging,
-          vakantie, etc.). Inkomsten/vaste lasten zijn alleen bekend vanaf
-          het jaar waarin je het maandoverzicht bent gaan bijhouden.
-          Vermogensgroei toont alleen een waarde als er minstens 2
-          besteedbaar-vermogen-punten in dat jaar bekend zijn.
-        </p>
+        <YearSwitcher
+          jaar={jaar}
+          jaren={jaren}
+          basePath="/jaaroverzicht"
+          extraParams={{ tab: "maanden" }}
+        />
+      </div>
+
+      <Card title={`Doel vs werkelijk ${jaar}`}>
+        <DoelenChart
+          doelPerMaand={doelen?.doelPerMaand ?? Array(12).fill(0)}
+          werkelijkPerMaand={doelen?.werkelijkPerMaand ?? Array(12).fill(0)}
+        />
+      </Card>
+
+      <Card title={`Doelen ${jaar} bewerken`}>
+        <DoelenForm jaar={jaar} data={doelen} />
       </Card>
     </div>
   );

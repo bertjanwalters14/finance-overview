@@ -45,11 +45,8 @@ export default async function MaandoverzichtPage({
             <thead>
               <tr className="text-left text-slate-400">
                 <th className="pb-2">Maand</th>
-                <th className="pb-2 text-right">Loon</th>
                 <th className="pb-2 text-right">Vaste lasten</th>
-                <th className="pb-2 text-right">Doel</th>
-                <th className="pb-2 text-right">Werkelijk</th>
-                <th className="pb-2 text-right">Belegging</th>
+                <th className="pb-2 text-right">Werkelijk gespaard</th>
                 <th></th>
               </tr>
             </thead>
@@ -60,19 +57,10 @@ export default async function MaandoverzichtPage({
                     {MAAND_NAMEN[m.maand - 1]}
                   </td>
                   <td className="py-2 text-right text-slate-300">
-                    {formatEURPrecies(m.loon)}
-                  </td>
-                  <td className="py-2 text-right text-slate-300">
                     {formatEURPrecies(vasteLastenTotaal(m))}
                   </td>
                   <td className="py-2 text-right text-slate-300">
-                    {formatEURPrecies(m.doelSparen)}
-                  </td>
-                  <td className="py-2 text-right text-slate-300">
                     {formatEURPrecies(m.werkelijkGespaard)}
-                  </td>
-                  <td className="py-2 text-right text-slate-300">
-                    {formatEURPrecies(m.beleggingInleg)}
                   </td>
                   <td className="py-2 text-right">
                     <Link
@@ -86,7 +74,7 @@ export default async function MaandoverzichtPage({
               ))}
               {maanden.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="py-4 text-slate-500">
+                  <td colSpan={4} className="py-4 text-slate-500">
                     Nog geen maanden ingevuld voor {jaar}.
                   </td>
                 </tr>

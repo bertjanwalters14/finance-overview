@@ -4,6 +4,8 @@ import { useState } from "react";
 import { saveMaand } from "./actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { inputClass } from "@/components/formStyles";
+import { vasteLastenTotaal } from "@/lib/types";
+import { formatEURPrecies } from "@/lib/format";
 import type { Maand, VasteLast } from "@/lib/types";
 
 export function MaandForm({
@@ -48,9 +50,14 @@ export function MaandForm({
         />
       </div>
 
-      <div>
-        <p className="mb-2 text-sm text-slate-400">Vaste lasten</p>
-        <div className="flex flex-col gap-2">
+      <details className="rounded-lg border border-slate-800 p-3">
+        <summary className="flex cursor-pointer items-center justify-between text-sm text-slate-400">
+          <span>Vaste lasten ({vasteLasten.length} posten)</span>
+          <span className="text-slate-300">
+            {formatEURPrecies(data ? vasteLastenTotaal(data) : 0)}
+          </span>
+        </summary>
+        <div className="mt-3 flex flex-col gap-2">
           {vasteLasten.map((v) => (
             <div key={v.id} className="flex gap-2">
               <input
@@ -92,7 +99,7 @@ export function MaandForm({
         >
           + post toevoegen
         </button>
-      </div>
+      </details>
 
       <SubmitButton>Opslaan</SubmitButton>
     </form>

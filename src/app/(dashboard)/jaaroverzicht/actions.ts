@@ -24,6 +24,5 @@ export async function saveDoelen(formData: FormData): Promise<void> {
 
   const data: JaarDoelen = { jaar, doelPerMaand, werkelijkPerMaand, categorieen };
   await setDoelen(data);
-  revalidatePath("/jaardoelen");
-  revalidatePath("/");
+  revalidatePath("/jaaroverzicht");
 }

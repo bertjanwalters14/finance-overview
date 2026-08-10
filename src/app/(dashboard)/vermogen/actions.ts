@@ -7,8 +7,16 @@ import {
   setOverigVermogen,
   getOverigVermogen,
   getAandelenPayt,
+  setAandelenPayt,
+  setLoonontwikkeling,
 } from "@/lib/data";
-import type { BesteedbaarVermogen, OverigVermogen } from "@/lib/types";
+import type {
+  BesteedbaarVermogen,
+  OverigVermogen,
+  AandeelhouderPayt,
+  AandelenPaytData,
+  LoonEntry,
+} from "@/lib/types";
 import { berekenOverwaardeAandeel, berekenEigenAandelenWaarde } from "@/lib/types";
 
 export async function saveBesteedbaarVermogen(
@@ -59,4 +67,44 @@ export async function saveOverigVermogen(formData: FormData): Promise<void> {
   await setOverigVermogen(data);
   revalidatePath("/vermogen");
   revalidatePath("/");
+}
+
+export async function saveAandelen(formData: FormData): Promise<void> {
+  const koersPerAandeel = Number(formData.get("koersPerAandeel") || 0);
+  const namen = formData.getAll("naam") as string[];
+  const aantallen = formData.getAll("aantal") as string[];
+  const inlegen = formData.getAll("inleg") as string[];
+  const dividenden = formData.getAll("dividend") as string[];
+
+  const aandeelhouders: AandeelhouderPayt[] = namen
+    .map((naam, i) => ({
+      naam: naam.trim(),
+      aantal: Number(aantallen[i] || 0),
+      inleg: Number(inlegen[i] || 0),
+      dividend: Number(dividenden[i] || 0),
+      vanJou: formData.get(`vanJou_${i}`) === "on",
+    }))
+    .filter((a) => a.naam.length > 0);
+
+  const data: AandelenPaytData = { koersPerAandeel, aandeelhouders };
+  await setAandelenPayt(data);
+  revalidatePath("/vermogen");
+  revalidatePath("/");
+}
+
+export async function saveLoon(formData: FormData): Promise<void> {
+  const jaren = formData.getAll("jaar") as string[];
+  const werkgevers = formData.getAll("werkgever") as string[];
+  const bedragen = formData.getAll("bedrag") as string[];
+
+  const data: LoonEntry[] = werkgevers
+    .map((werkgever, i) => ({
+      jaar: Number(jaren[i] || 0),
+      werkgever: werkgever.trim(),
+      bedrag: Number(bedragen[i] || 0),
+    }))
+    .filter((e) => e.werkgever.length > 0);
+
+  await setLoonontwikkeling(data);
+  revalidatePath("/vermogen");
 }
