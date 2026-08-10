@@ -30,22 +30,28 @@ export default async function JaaroverzichtPage() {
       ]);
 
       const doelTotaal = doelen?.doelPerMaand.reduce((a, b) => a + b, 0) ?? 0;
-      // "Werkelijk gespaard" is sparen + alle categorieën samen (belegging,
-      // vakantie, etc.) — dat is wat je dat jaar in totaal hebt weggezet,
-      // niet alleen de losse "Werkelijk"-kolom uit de doelen-tabel.
-      const categorieenTotaal =
-        doelen?.categorieen.reduce(
-          (s, c) => s + c.bedragenPerMaand.reduce((a, b) => a + b, 0),
-          0
-        ) ?? 0;
-      const werkelijkTotaal =
-        (doelen?.werkelijkPerMaand.reduce((a, b) => a + b, 0) ?? 0) +
-        categorieenTotaal;
 
       const inkomstenTotaal =
         maanden.length > 0
           ? maanden.reduce((s, m) => s + m.loon + m.overigeInkomsten, 0)
           : null;
+
+      // "Werkelijk gespaard" is sparen + alle categorieën samen (belegging,
+      // vakantie, etc.) — voor jaren zónder maandoverzicht-data komen die
+      // categorieën uit apart bijgehouden potjes, dus die tellen echt mee.
+      // Voor jaren MET maandoverzicht-data (nu: 2026) komt "Belegging" uit
+      // dezelfde pot als het sparen-doel (bv. automatisch beleggen vanuit
+      // je spaarrekening bij Trade Republic) — dan niet nog eens optellen.
+      const categorieenTotaal =
+        maanden.length > 0
+          ? 0
+          : doelen?.categorieen.reduce(
+              (s, c) => s + c.bedragenPerMaand.reduce((a, b) => a + b, 0),
+              0
+            ) ?? 0;
+      const werkelijkTotaal =
+        (doelen?.werkelijkPerMaand.reduce((a, b) => a + b, 0) ?? 0) +
+        categorieenTotaal;
       const vasteLastenTotaal =
         maanden.length > 0
           ? maanden.reduce(
