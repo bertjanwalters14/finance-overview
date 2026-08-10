@@ -2,6 +2,7 @@ import { kvGet, kvSet, kvKeys } from './kv'
 import type {
   Maand,
   BesteedbaarVermogen,
+  NietBesteedbaarPunt,
   OverigVermogen,
   AandelenPaytData,
   LoonEntry,
@@ -56,6 +57,28 @@ export async function listBesteedbaarVermogenGeschiedenis(): Promise<
 export async function getLaatsteBesteedbaarVermogen(): Promise<BesteedbaarVermogen | null> {
   const geschiedenis = await listBesteedbaarVermogenGeschiedenis()
   return geschiedenis.at(-1) ?? null
+}
+
+function nietBesteedbaarKey(jaar: number, maand: number) {
+  return `vermogen:nietbesteedbaar:${jaar}:${String(maand).padStart(2, '0')}`
+}
+
+export async function setNietBesteedbaarPunt(
+  data: NietBesteedbaarPunt
+): Promise<void> {
+  await kvSet(nietBesteedbaarKey(data.jaar, data.maand), data)
+}
+
+export async function listNietBesteedbaarGeschiedenis(): Promise<
+  NietBesteedbaarPunt[]
+> {
+  const keys = await kvKeys('vermogen:nietbesteedbaar:')
+  const punten = await Promise.all(
+    keys.map((k) => kvGet<NietBesteedbaarPunt>(k))
+  )
+  return punten
+    .filter((p): p is NietBesteedbaarPunt => p !== null)
+    .sort((a, b) => a.jaar - b.jaar || a.maand - b.maand)
 }
 
 const OVERIG_VERMOGEN_KEY = 'vermogen:overig'

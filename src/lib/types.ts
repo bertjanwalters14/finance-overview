@@ -62,14 +62,20 @@ export interface BesteedbaarVermogen {
   maand: number
   spaarrekening: number
   belegging: number
-  // Snapshot van het niet-besteedbaar vermogen (overwaarde-aandeel + Payt-
-  // aandelen - schuld) op het moment van opslaan. Optioneel, want oudere
-  // punten (voor deze functie bestond) hebben dit niet.
-  nietBesteedbaarVermogen?: number
 }
 
 export function besteedbaarVermogenTotaal(b: BesteedbaarVermogen): number {
   return b.spaarrekening + b.belegging
+}
+
+// Niet-besteedbaar vermogen (huis-overwaarde-aandeel + Payt-aandelen -
+// schuld) heeft een eigen, onafhankelijke tijdlijn — de punten liggen niet
+// per se op dezelfde jaar/maand als de besteedbaar-vermogen-punten (bv. een
+// huizenverkoop of koersstijging valt zelden samen met een spaar-update).
+export interface NietBesteedbaarPunt {
+  jaar: number
+  maand: number
+  waarde: number
 }
 
 // Overig vermogen (huis, hypotheek, schuld) verandert zelden, dus dit is één

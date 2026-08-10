@@ -4,6 +4,7 @@ import {
   getOverigVermogen,
   getAandelenPayt,
   listBesteedbaarVermogenGeschiedenis,
+  listNietBesteedbaarGeschiedenis,
 } from "@/lib/data";
 import {
   berekenEigenVermogen,
@@ -18,12 +19,13 @@ import { OverigVermogenForm } from "./OverigVermogenForm";
 import { VermogenChart } from "./VermogenChart";
 
 export default async function VermogenPage() {
-  const [laatsteBesteedbaar, overig, aandelen, geschiedenis] =
+  const [laatsteBesteedbaar, overig, aandelen, geschiedenis, nietBesteedbaarGeschiedenis] =
     await Promise.all([
       getLaatsteBesteedbaarVermogen(),
       getOverigVermogen(),
       getAandelenPayt(),
       listBesteedbaarVermogenGeschiedenis(),
+      listNietBesteedbaarGeschiedenis(),
     ]);
 
   const aandelenPaytWaarde = berekenEigenAandelenWaarde(aandelen);
@@ -46,9 +48,12 @@ export default async function VermogenPage() {
         </Card>
       )}
 
-      <Card title="Besteedbaar vermogen door de tijd">
-        {geschiedenis.length > 0 ? (
-          <VermogenChart data={geschiedenis} />
+      <Card title="Vermogen door de tijd">
+        {geschiedenis.length > 0 || nietBesteedbaarGeschiedenis.length > 0 ? (
+          <VermogenChart
+            besteedbaar={geschiedenis}
+            nietBesteedbaar={nietBesteedbaarGeschiedenis}
+          />
         ) : (
           <p className="text-slate-500">
             Nog geen historische punten. Sla hieronder je eerste maand op.

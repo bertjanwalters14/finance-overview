@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import {
   setBesteedbaarVermogen,
+  setNietBesteedbaarPunt,
   setOverigVermogen,
   getOverigVermogen,
   getAandelenPayt,
@@ -14,27 +15,34 @@ export async function saveBesteedbaarVermogen(
   formData: FormData
 ): Promise<void> {
   const nu = new Date();
+  const jaar = nu.getFullYear();
+  const maand = nu.getMonth() + 1;
+
+  const data: BesteedbaarVermogen = {
+    jaar,
+    maand,
+    spaarrekening: Number(formData.get("spaarrekening") || 0),
+    belegging: Number(formData.get("belegging") || 0),
+  };
+
+  await setBesteedbaarVermogen(data);
 
   const [overig, aandelen] = await Promise.all([
     getOverigVermogen(),
     getAandelenPayt(),
   ]);
 
-  const nietBesteedbaarVermogen = overig
-    ? berekenOverwaardeAandeel(overig) +
-      berekenEigenAandelenWaarde(aandelen) -
-      overig.schuld
-    : undefined;
+  if (overig) {
+    await setNietBesteedbaarPunt({
+      jaar,
+      maand,
+      waarde:
+        berekenOverwaardeAandeel(overig) +
+        berekenEigenAandelenWaarde(aandelen) -
+        overig.schuld,
+    });
+  }
 
-  const data: BesteedbaarVermogen = {
-    jaar: nu.getFullYear(),
-    maand: nu.getMonth() + 1,
-    spaarrekening: Number(formData.get("spaarrekening") || 0),
-    belegging: Number(formData.get("belegging") || 0),
-    nietBesteedbaarVermogen,
-  };
-
-  await setBesteedbaarVermogen(data);
   revalidatePath("/vermogen");
   revalidatePath("/");
 }
