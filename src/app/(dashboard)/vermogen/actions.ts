@@ -1,19 +1,37 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { setBesteedbaarVermogen, setOverigVermogen } from "@/lib/data";
+import {
+  setBesteedbaarVermogen,
+  setOverigVermogen,
+  getOverigVermogen,
+  getAandelenPayt,
+} from "@/lib/data";
 import type { BesteedbaarVermogen, OverigVermogen } from "@/lib/types";
+import { berekenOverwaardeAandeel, berekenEigenAandelenWaarde } from "@/lib/types";
 
 export async function saveBesteedbaarVermogen(
   formData: FormData
 ): Promise<void> {
   const nu = new Date();
 
+  const [overig, aandelen] = await Promise.all([
+    getOverigVermogen(),
+    getAandelenPayt(),
+  ]);
+
+  const nietBesteedbaarVermogen = overig
+    ? berekenOverwaardeAandeel(overig) +
+      berekenEigenAandelenWaarde(aandelen) -
+      overig.schuld
+    : undefined;
+
   const data: BesteedbaarVermogen = {
     jaar: nu.getFullYear(),
     maand: nu.getMonth() + 1,
     spaarrekening: Number(formData.get("spaarrekening") || 0),
     belegging: Number(formData.get("belegging") || 0),
+    nietBesteedbaarVermogen,
   };
 
   await setBesteedbaarVermogen(data);

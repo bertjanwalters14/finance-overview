@@ -8,6 +8,7 @@ const links = [
   { href: "/", label: "Dashboard" },
   { href: "/maandoverzicht", label: "Maandoverzicht" },
   { href: "/jaardoelen", label: "Jaardoelen" },
+  { href: "/jaaroverzicht", label: "Jaaroverzicht" },
   { href: "/vermogen", label: "Vermogen" },
   { href: "/aandelen", label: "Aandelen Payt" },
   { href: "/loon", label: "Loonontwikkeling" },

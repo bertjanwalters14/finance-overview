@@ -6,6 +6,7 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  Legend,
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
@@ -15,7 +16,8 @@ import type { BesteedbaarVermogen } from "@/lib/types";
 export function VermogenChart({ data }: { data: BesteedbaarVermogen[] }) {
   const chartData = data.map((p) => ({
     label: `${MAAND_NAMEN[p.maand - 1].slice(0, 3)} ${p.jaar}`,
-    Totaal: besteedbaarVermogenTotaal(p),
+    Besteedbaar: besteedbaarVermogenTotaal(p),
+    "Niet-besteedbaar": p.nietBesteedbaarVermogen,
   }));
 
   return (
@@ -40,12 +42,21 @@ export function VermogenChart({ data }: { data: BesteedbaarVermogen[] }) {
               color: "#e2e8f0",
             }}
           />
+          <Legend />
           <Line
             type="monotone"
-            dataKey="Totaal"
+            dataKey="Besteedbaar"
             stroke="#10b981"
             strokeWidth={2}
             dot={{ r: 3 }}
+          />
+          <Line
+            type="monotone"
+            dataKey="Niet-besteedbaar"
+            stroke="#818cf8"
+            strokeWidth={2}
+            dot={{ r: 3 }}
+            connectNulls={false}
           />
         </LineChart>
       </ResponsiveContainer>

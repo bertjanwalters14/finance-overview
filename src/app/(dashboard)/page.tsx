@@ -9,6 +9,7 @@ import {
   berekenEigenVermogen,
   berekenEigenAandelenWaarde,
   berekenOverwaardeAandeel,
+  berekenInkomstenVerhouding,
   MAAND_NAMEN,
 } from "@/lib/types";
 import { formatEUR, formatEURPrecies } from "@/lib/format";
@@ -37,6 +38,14 @@ export default async function DashboardPage() {
     maand?.vasteLasten.reduce((s, v) => s + v.bedrag, 0) ?? 0;
   const inkomstenTotaal = (maand?.loon ?? 0) + (maand?.overigeInkomsten ?? 0);
   const overNaVasteLasten = inkomstenTotaal - vasteLastenTotaal;
+
+  const verhouding = maand ? berekenInkomstenVerhouding(maand) : null;
+  const vasteLastenBreedte = verhouding
+    ? Math.max(0, Math.min(100, verhouding.vasteLastenPercentage))
+    : 0;
+  const sparenBreedte = verhouding
+    ? Math.max(0, Math.min(100 - vasteLastenBreedte, verhouding.sparenPercentage))
+    : 0;
 
   const doelJaarTotaal = doelen?.doelPerMaand.reduce((a, b) => a + b, 0) ?? 0;
   const werkelijkJaarTotaal =
@@ -91,6 +100,52 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
+      <Card title={`Inkomstenverdeling ${MAAND_NAMEN[maandNr - 1]}`}>
+        {maand && verhouding ? (
+          <>
+            <div className="mb-3 flex h-3 w-full overflow-hidden rounded-full bg-slate-800">
+              <div
+                className="h-full bg-amber-500"
+                style={{ width: `${vasteLastenBreedte}%` }}
+              />
+              <div
+                className="h-full bg-emerald-500"
+                style={{ width: `${sparenBreedte}%` }}
+              />
+            </div>
+            <dl className="space-y-1 text-sm">
+              <PercentRow
+                color="bg-amber-500"
+                label="Vaste lasten"
+                percentage={verhouding.vasteLastenPercentage}
+              />
+              <PercentRow
+                color="bg-emerald-500"
+                label="Sparen"
+                percentage={verhouding.sparenPercentage}
+              />
+              <PercentRow
+                color="bg-slate-600"
+                label="Overig"
+                percentage={verhouding.overigPercentage}
+              />
+            </dl>
+            {verhouding.overigPercentage < 0 && (
+              <p className="mt-3 text-xs text-red-400">
+                Vaste lasten en sparen samen zijn deze maand{" "}
+                {formatEURPrecies(
+                  (-verhouding.overigPercentage / 100) *
+                    (maand.loon + maand.overigeInkomsten)
+                )}{" "}
+                boven je inkomen.
+              </p>
+            )}
+          </>
+        ) : (
+          <p className="text-slate-500">Nog geen gegevens voor deze maand.</p>
+        )}
+      </Card>
+
       <Card title={`Spaardoel ${jaar}`}>
         {doelen ? (
           <>
@@ -136,6 +191,26 @@ function Row({
     >
       <dt>{label}</dt>
       <dd>{formatEURPrecies(value)}</dd>
+    </div>
+  );
+}
+
+function PercentRow({
+  color,
+  label,
+  percentage,
+}: {
+  color: string;
+  label: string;
+  percentage: number;
+}) {
+  return (
+    <div className="flex items-center justify-between text-slate-300">
+      <dt className="flex items-center gap-2">
+        <span className={`h-2 w-2 rounded-full ${color}`} />
+        {label}
+      </dt>
+      <dd>{percentage.toFixed(1)}%</dd>
     </div>
   );
 }

@@ -14,6 +14,33 @@ export interface Maand {
   beleggingInleg: number
 }
 
+export interface InkomstenVerhouding {
+  vasteLastenPercentage: number
+  sparenPercentage: number
+  // Kan negatief zijn: dan zijn vaste lasten + sparen samen groter dan je
+  // inkomen die maand. Bewust niet geclamped, want dat is precies het signaal.
+  overigPercentage: number
+}
+
+export function berekenInkomstenVerhouding(m: Maand): InkomstenVerhouding {
+  const inkomsten = m.loon + m.overigeInkomsten
+  const vasteLasten = m.vasteLasten.reduce((s, v) => s + v.bedrag, 0)
+  const sparen = m.werkelijkGespaard + m.beleggingInleg
+
+  if (inkomsten <= 0) {
+    return { vasteLastenPercentage: 0, sparenPercentage: 0, overigPercentage: 0 }
+  }
+
+  const vasteLastenPercentage = (vasteLasten / inkomsten) * 100
+  const sparenPercentage = (sparen / inkomsten) * 100
+
+  return {
+    vasteLastenPercentage,
+    sparenPercentage,
+    overigPercentage: 100 - vasteLastenPercentage - sparenPercentage,
+  }
+}
+
 // Besteedbaar vermogen (spaarrekening + belegging) schommelt vaak en wordt
 // per kalendermaand gehistoriseerd, zodat je een trend kunt zien.
 export interface BesteedbaarVermogen {
@@ -21,6 +48,10 @@ export interface BesteedbaarVermogen {
   maand: number
   spaarrekening: number
   belegging: number
+  // Snapshot van het niet-besteedbaar vermogen (overwaarde-aandeel + Payt-
+  // aandelen - schuld) op het moment van opslaan. Optioneel, want oudere
+  // punten (voor deze functie bestond) hebben dit niet.
+  nietBesteedbaarVermogen?: number
 }
 
 export function besteedbaarVermogenTotaal(b: BesteedbaarVermogen): number {
