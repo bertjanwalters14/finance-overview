@@ -95,7 +95,7 @@ export function VermogenChart({
             stroke="#10b981"
             strokeWidth={2}
             dot={{ r: 3 }}
-            connectNulls={false}
+            connectNulls
           />
           <Line
             yAxisId="nietBesteedbaar"
