@@ -22,10 +22,22 @@ export interface InkomstenVerhouding {
   overigPercentage: number
 }
 
+// Een vaste-lasten-post die eigenlijk een spaar-overboeking is (bv. een
+// post genaamd "Sparen") telt hier mee als sparen, niet als vaste last —
+// anders vertekent dat de verhouding die je net wil zien.
+function isSpaarPost(v: VasteLast): boolean {
+  return v.naam.trim().toLowerCase() === 'sparen'
+}
+
 export function berekenInkomstenVerhouding(m: Maand): InkomstenVerhouding {
   const inkomsten = m.loon + m.overigeInkomsten
-  const vasteLasten = m.vasteLasten.reduce((s, v) => s + v.bedrag, 0)
-  const sparen = m.werkelijkGespaard + m.beleggingInleg
+  const vasteLasten = m.vasteLasten
+    .filter((v) => !isSpaarPost(v))
+    .reduce((s, v) => s + v.bedrag, 0)
+  const sparenViaVasteLasten = m.vasteLasten
+    .filter(isSpaarPost)
+    .reduce((s, v) => s + v.bedrag, 0)
+  const sparen = m.werkelijkGespaard + m.beleggingInleg + sparenViaVasteLasten
 
   if (inkomsten <= 0) {
     return { vasteLastenPercentage: 0, sparenPercentage: 0, overigPercentage: 0 }
