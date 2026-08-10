@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { listMaandenVanJaar } from "@/lib/data";
-import { MAAND_NAMEN } from "@/lib/types";
+import { MAAND_NAMEN, vasteLastenTotaal } from "@/lib/types";
 import { toCsv, csvResponse } from "@/lib/csv";
 
 export async function GET(req: NextRequest) {
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
     m.loon,
     m.overigeInkomsten,
     m.vasteLasten.map((v) => `${v.naam}:${v.bedrag}`).join("; "),
-    m.vasteLasten.reduce((s, v) => s + v.bedrag, 0),
+    vasteLastenTotaal(m),
     m.doelSparen,
     m.werkelijkGespaard,
     m.beleggingInleg,

@@ -10,6 +10,7 @@ import {
   berekenEigenAandelenWaarde,
   berekenOverwaardeAandeel,
   berekenInkomstenVerhouding,
+  vasteLastenTotaal,
   MAAND_NAMEN,
 } from "@/lib/types";
 import { formatEUR, formatEURPrecies } from "@/lib/format";
@@ -34,10 +35,9 @@ export default async function DashboardPage() {
       ? berekenEigenVermogen(besteedbaar, overig, aandelenPaytWaarde)
       : null;
 
-  const vasteLastenTotaal =
-    maand?.vasteLasten.reduce((s, v) => s + v.bedrag, 0) ?? 0;
+  const vasteLastenBedrag = maand ? vasteLastenTotaal(maand) : 0;
   const inkomstenTotaal = (maand?.loon ?? 0) + (maand?.overigeInkomsten ?? 0);
-  const overNaVasteLasten = inkomstenTotaal - vasteLastenTotaal;
+  const overNaVasteLasten = inkomstenTotaal - vasteLastenBedrag;
 
   const verhouding = maand ? berekenInkomstenVerhouding(maand) : null;
   const vasteLastenBreedte = verhouding
@@ -87,7 +87,7 @@ export default async function DashboardPage() {
             <dl className="space-y-1 text-sm">
               <Row label="Loon" value={maand.loon} />
               <Row label="Overige inkomsten" value={maand.overigeInkomsten} />
-              <Row label="Vaste lasten" value={-vasteLastenTotaal} />
+              <Row label="Vaste lasten" value={-vasteLastenBedrag} />
               <Row label="Over" value={overNaVasteLasten} bold />
               <div className="my-2 border-t border-slate-800" />
               <Row label="Doel sparen" value={maand.doelSparen} />

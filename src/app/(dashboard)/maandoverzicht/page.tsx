@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { listMaandenVanJaar, getMaand } from "@/lib/data";
-import { MAAND_NAMEN } from "@/lib/types";
+import { MAAND_NAMEN, vasteLastenTotaal } from "@/lib/types";
 import { Card } from "@/components/Card";
 import { YearSwitcher } from "@/components/YearSwitcher";
 import { ExportLink } from "@/components/ExportLink";
@@ -63,9 +63,7 @@ export default async function MaandoverzichtPage({
                     {formatEURPrecies(m.loon)}
                   </td>
                   <td className="py-2 text-right text-slate-300">
-                    {formatEURPrecies(
-                      m.vasteLasten.reduce((s, v) => s + v.bedrag, 0)
-                    )}
+                    {formatEURPrecies(vasteLastenTotaal(m))}
                   </td>
                   <td className="py-2 text-right text-slate-300">
                     {formatEURPrecies(m.doelSparen)}

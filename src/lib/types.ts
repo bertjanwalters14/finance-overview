@@ -23,22 +23,27 @@ export interface InkomstenVerhouding {
 }
 
 // Een vaste-lasten-post genaamd "Sparen" is een kopie van het maanddoel,
-// geen echte automatische overboeking — die post negeren we hier dus
-// volledig (telt niet als vaste last, en ook niet als sparen). Belegging
-// inleg is een los/gepland cijfer, geen maandelijkse uitgave, en telt hier
-// dus ook niet mee. Sparen % gebruikt het maanddoel (doelSparen), niet
-// "werkelijk gespaard" — dat laatste vul je pas aan het einde van de maand
-// in en staat dus het grootste deel van de maand nog op 0, terwijl het
-// doel juist leidend is voor hoe je inkomen die maand verdeeld is.
+// geen echte automatische overboeking — die post negeren we dus overal
+// (telt niet als vaste last, en ook niet als sparen).
 function isSpaarPost(v: VasteLast): boolean {
   return v.naam.trim().toLowerCase() === 'sparen'
 }
 
-export function berekenInkomstenVerhouding(m: Maand): InkomstenVerhouding {
-  const inkomsten = m.loon + m.overigeInkomsten
-  const vasteLasten = m.vasteLasten
+// De echte vaste lasten van een maand, dus zonder de "Sparen"-post.
+export function vasteLastenTotaal(m: Maand): number {
+  return m.vasteLasten
     .filter((v) => !isSpaarPost(v))
     .reduce((s, v) => s + v.bedrag, 0)
+}
+
+// Belegging inleg is een los/gepland cijfer, geen maandelijkse uitgave, en
+// telt hier dus niet mee. Sparen % gebruikt het maanddoel (doelSparen), niet
+// "werkelijk gespaard" — dat laatste vul je pas aan het einde van de maand
+// in en staat dus het grootste deel van de maand nog op 0, terwijl het
+// doel juist leidend is voor hoe je inkomen die maand verdeeld is.
+export function berekenInkomstenVerhouding(m: Maand): InkomstenVerhouding {
+  const inkomsten = m.loon + m.overigeInkomsten
+  const vasteLasten = vasteLastenTotaal(m)
   const sparen = m.doelSparen
 
   if (inkomsten <= 0) {

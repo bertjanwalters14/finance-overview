@@ -4,7 +4,7 @@ import {
   listMaandenVanJaar,
   listBesteedbaarVermogenGeschiedenis,
 } from "@/lib/data";
-import { besteedbaarVermogenTotaal } from "@/lib/types";
+import { besteedbaarVermogenTotaal, vasteLastenTotaal } from "@/lib/types";
 import { Card } from "@/components/Card";
 import { formatEUR } from "@/lib/format";
 
@@ -51,12 +51,9 @@ export default async function JaaroverzichtPage() {
       const werkelijkTotaal =
         (doelen?.werkelijkPerMaand.reduce((a, b) => a + b, 0) ?? 0) +
         categorieenTotaal;
-      const vasteLastenTotaal =
+      const vasteLastenSom =
         maanden.length > 0
-          ? maanden.reduce(
-              (s, m) => s + m.vasteLasten.reduce((s2, v) => s2 + v.bedrag, 0),
-              0
-            )
+          ? maanden.reduce((s, m) => s + vasteLastenTotaal(m), 0)
           : null;
 
       // Alleen tonen als we hem echt gemeten hebben (eerste vs. laatste
@@ -74,7 +71,7 @@ export default async function JaaroverzichtPage() {
         doelTotaal,
         werkelijkTotaal,
         inkomstenTotaal,
-        vasteLastenTotaal,
+        vasteLastenTotaal: vasteLastenSom,
         vermogensgroei,
       };
     })
