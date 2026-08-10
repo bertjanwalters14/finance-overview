@@ -30,8 +30,17 @@ export default async function JaaroverzichtPage() {
       ]);
 
       const doelTotaal = doelen?.doelPerMaand.reduce((a, b) => a + b, 0) ?? 0;
+      // "Werkelijk gespaard" is sparen + alle categorieën samen (belegging,
+      // vakantie, etc.) — dat is wat je dat jaar in totaal hebt weggezet,
+      // niet alleen de losse "Werkelijk"-kolom uit de doelen-tabel.
+      const categorieenTotaal =
+        doelen?.categorieen.reduce(
+          (s, c) => s + c.bedragenPerMaand.reduce((a, b) => a + b, 0),
+          0
+        ) ?? 0;
       const werkelijkTotaal =
-        doelen?.werkelijkPerMaand.reduce((a, b) => a + b, 0) ?? 0;
+        (doelen?.werkelijkPerMaand.reduce((a, b) => a + b, 0) ?? 0) +
+        categorieenTotaal;
 
       const inkomstenTotaal =
         maanden.length > 0
@@ -46,9 +55,8 @@ export default async function JaaroverzichtPage() {
           : null;
 
       // Bij voorkeur de echt gemeten groei (uit besteedbaar-vermogen-
-      // punten dat jaar). Zonder minstens 2 punten: schatting op basis van
-      // wat je dat jaar daadwerkelijk hebt weggezet — sparen (werkelijk) +
-      // alle categorieën (belegging, vakantie, etc.) samen.
+      // punten dat jaar). Zonder minstens 2 punten: schatting = werkelijk
+      // gespaard (dat zelf al sparen + categorieën samen is, zie boven).
       const puntenDitJaar = besteedbaarHistorie.filter((p) => p.jaar === jaar);
       const vermogensgroeiGemeten =
         puntenDitJaar.length >= 2
@@ -56,14 +64,7 @@ export default async function JaaroverzichtPage() {
             besteedbaarVermogenTotaal(puntenDitJaar[0])
           : null;
 
-      const categorieenTotaal =
-        doelen?.categorieen.reduce(
-          (s, c) => s + c.bedragenPerMaand.reduce((a, b) => a + b, 0),
-          0
-        ) ?? 0;
-      const vermogensgroeiGeschat = werkelijkTotaal + categorieenTotaal;
-
-      const vermogensgroei = vermogensgroeiGemeten ?? vermogensgroeiGeschat;
+      const vermogensgroei = vermogensgroeiGemeten ?? werkelijkTotaal;
 
       return {
         jaar,
@@ -129,7 +130,7 @@ export default async function JaaroverzichtPage() {
                       {r.vermogensgroeiGeschat && (
                         <span
                           className="ml-1 text-slate-500"
-                          title="Geschat: werkelijk gespaard + alle categorieën samen (geen 2 vermogens-meetpunten dat jaar)"
+                          title="Geschat als werkelijk gespaard (geen 2 vermogens-meetpunten dat jaar)"
                         >
                           *
                         </span>
@@ -146,11 +147,12 @@ export default async function JaaroverzichtPage() {
           </table>
         </div>
         <p className="mt-4 text-xs text-slate-500">
-          Inkomsten/vaste lasten zijn alleen bekend vanaf het jaar waarin je
-          het maandoverzicht bent gaan bijhouden. Vermogensgroei is gemeten
-          (eerste vs. laatste besteedbaar-vermogen-punt dat jaar) waar
-          mogelijk, anders* geschat als werkelijk gespaard + alle
-          categorieën (belegging, vakantie, etc.) samen.
+          Werkelijk gespaard is sparen + alle categorieën samen (belegging,
+          vakantie, etc.). Inkomsten/vaste lasten zijn alleen bekend vanaf
+          het jaar waarin je het maandoverzicht bent gaan bijhouden.
+          Vermogensgroei is gemeten (eerste vs. laatste
+          besteedbaar-vermogen-punt dat jaar) waar mogelijk, anders* gelijk
+          aan werkelijk gespaard.
         </p>
       </Card>
     </div>
