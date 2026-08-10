@@ -25,7 +25,7 @@ export async function saveOverigVermogen(formData: FormData): Promise<void> {
   const data: OverigVermogen = {
     huisWaarde: Number(formData.get("huisWaarde") || 0),
     hypotheek: Number(formData.get("hypotheek") || 0),
-    overwaardeAandeel: Number(formData.get("overwaardeAandeel") || 0),
+    overwaardePercentage: Number(formData.get("overwaardePercentage") || 0),
     schuld: Number(formData.get("schuld") || 0),
     bijgewerktOp: new Date().toISOString().slice(0, 10),
   };

@@ -8,6 +8,7 @@ import {
 import {
   berekenEigenVermogen,
   berekenEigenAandelenWaarde,
+  berekenOverwaardeAandeel,
   MAAND_NAMEN,
 } from "@/lib/types";
 import { formatEUR, formatEURPrecies } from "@/lib/format";
@@ -59,7 +60,7 @@ export default async function DashboardPage() {
                 <Row label="Payt aandelen" value={aandelenPaytWaarde} />
                 <Row
                   label="Overwaarde (jouw deel)"
-                  value={overig.overwaardeAandeel}
+                  value={berekenOverwaardeAandeel(overig)}
                 />
                 <Row label="Schuld" value={-overig.schuld} />
               </dl>

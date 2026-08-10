@@ -7,6 +7,8 @@ import {
   MAAND_NAMEN,
   besteedbaarVermogenTotaal,
   berekenEigenAandelenWaarde,
+  berekenOverwaarde,
+  berekenOverwaardeAandeel,
 } from "@/lib/types";
 import { toCsv, csvResponse } from "@/lib/csv";
 
@@ -44,7 +46,9 @@ export async function GET() {
           ["Payt aandelen waarde", berekenEigenAandelenWaarde(aandelen)],
           ["Huiswaarde", overig.huisWaarde],
           ["Hypotheek", overig.hypotheek],
-          ["Overwaarde (jouw deel)", overig.overwaardeAandeel],
+          ["Overwaarde totaal", berekenOverwaarde(overig)],
+          ["Jouw aandeel (%)", overig.overwaardePercentage],
+          ["Overwaarde (jouw deel)", berekenOverwaardeAandeel(overig)],
           ["Schuld", overig.schuld],
           ["Bijgewerkt op", overig.bijgewerktOp],
         ],

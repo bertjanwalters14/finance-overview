@@ -115,6 +115,7 @@ huis_waarde = float(cell(fin, 27, 2))
 hypotheek = float(cell(fin, 28, 2))
 overwaarde_aandeel = float(cell(fin, 29, 3))
 schuld = float(cell(fin, 33, 2))
+overwaarde_percentage = round(overwaarde_aandeel / (huis_waarde - hypotheek) * 100, 2)
 
 seed["besteedbaarVermogen"] = {
     "jaar": HUIDIG_JAAR,
@@ -126,7 +127,7 @@ seed["besteedbaarVermogen"] = {
 seed["overigVermogen"] = {
     "huisWaarde": huis_waarde,
     "hypotheek": hypotheek,
-    "overwaardeAandeel": overwaarde_aandeel,
+    "overwaardePercentage": overwaarde_percentage,
     "schuld": schuld,
     "bijgewerktOp": "2026-08-05",
 }

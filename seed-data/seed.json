@@ -430,7 +430,7 @@
   "overigVermogen": {
     "huisWaarde": 825000.0,
     "hypotheek": 475000.0,
-    "overwaardeAandeel": 175000.0,
+    "overwaardePercentage": 50.0,
     "schuld": 6750.0,
     "bijgewerktOp": "2026-08-05"
   },

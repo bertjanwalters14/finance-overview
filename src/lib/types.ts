@@ -34,11 +34,20 @@ export function besteedbaarVermogenTotaal(b: BesteedbaarVermogen): number {
 export interface OverigVermogen {
   huisWaarde: number
   hypotheek: number
-  // Jouw deel in de overwaarde van het huis (bv. bij gedeeld eigendom is dit
-  // niet automatisch huisWaarde - hypotheek, maar een los ingevuld bedrag).
-  overwaardeAandeel: number
+  // Jouw aandeel (0-100%) in de overwaarde, bv. bij gedeeld eigendom van het
+  // huis. De overwaarde zelf (huisWaarde - hypotheek) wordt niet los
+  // opgeslagen, maar altijd berekend — zie berekenOverwaarde.
+  overwaardePercentage: number
   schuld: number
   bijgewerktOp: string
+}
+
+export function berekenOverwaarde(o: OverigVermogen): number {
+  return o.huisWaarde - o.hypotheek
+}
+
+export function berekenOverwaardeAandeel(o: OverigVermogen): number {
+  return berekenOverwaarde(o) * (o.overwaardePercentage / 100)
 }
 
 export function berekenEigenVermogen(
@@ -49,7 +58,7 @@ export function berekenEigenVermogen(
   return (
     besteedbaarVermogenTotaal(besteedbaar) +
     aandelenPaytWaarde +
-    overig.overwaardeAandeel -
+    berekenOverwaardeAandeel(overig) -
     overig.schuld
   )
 }
