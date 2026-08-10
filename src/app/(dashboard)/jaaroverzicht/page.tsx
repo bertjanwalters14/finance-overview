@@ -15,7 +15,6 @@ interface JaarRij {
   inkomstenTotaal: number | null;
   vasteLastenTotaal: number | null;
   vermogensgroei: number | null;
-  vermogensgroeiGeschat: boolean;
 }
 
 export default async function JaaroverzichtPage() {
@@ -60,17 +59,15 @@ export default async function JaaroverzichtPage() {
             )
           : null;
 
-      // Bij voorkeur de echt gemeten groei (uit besteedbaar-vermogen-
-      // punten dat jaar). Zonder minstens 2 punten: schatting = werkelijk
-      // gespaard (dat zelf al sparen + categorieën samen is, zie boven).
+      // Alleen tonen als we hem echt gemeten hebben (eerste vs. laatste
+      // besteedbaar-vermogen-punt dat jaar) — geen schatting, dat gaf een
+      // vertekend beeld.
       const puntenDitJaar = besteedbaarHistorie.filter((p) => p.jaar === jaar);
-      const vermogensgroeiGemeten =
+      const vermogensgroei =
         puntenDitJaar.length >= 2
           ? besteedbaarVermogenTotaal(puntenDitJaar[puntenDitJaar.length - 1]) -
             besteedbaarVermogenTotaal(puntenDitJaar[0])
           : null;
-
-      const vermogensgroei = vermogensgroeiGemeten ?? werkelijkTotaal;
 
       return {
         jaar,
@@ -79,7 +76,6 @@ export default async function JaaroverzichtPage() {
         inkomstenTotaal,
         vasteLastenTotaal,
         vermogensgroei,
-        vermogensgroeiGeschat: vermogensgroeiGemeten === null,
       };
     })
   );
@@ -133,14 +129,6 @@ export default async function JaaroverzichtPage() {
                       {r.vermogensgroei !== null
                         ? formatEUR(r.vermogensgroei)
                         : "—"}
-                      {r.vermogensgroeiGeschat && (
-                        <span
-                          className="ml-1 text-slate-500"
-                          title="Geschat als werkelijk gespaard (geen 2 vermogens-meetpunten dat jaar)"
-                        >
-                          *
-                        </span>
-                      )}
                       <Delta
                         huidig={r.vermogensgroei}
                         vorig={vorige?.vermogensgroei ?? null}
@@ -156,9 +144,8 @@ export default async function JaaroverzichtPage() {
           Werkelijk gespaard is sparen + alle categorieën samen (belegging,
           vakantie, etc.). Inkomsten/vaste lasten zijn alleen bekend vanaf
           het jaar waarin je het maandoverzicht bent gaan bijhouden.
-          Vermogensgroei is gemeten (eerste vs. laatste
-          besteedbaar-vermogen-punt dat jaar) waar mogelijk, anders* gelijk
-          aan werkelijk gespaard.
+          Vermogensgroei toont alleen een waarde als er minstens 2
+          besteedbaar-vermogen-punten in dat jaar bekend zijn.
         </p>
       </Card>
     </div>
