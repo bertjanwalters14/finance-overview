@@ -124,7 +124,6 @@ seed["besteedbaarVermogen"] = {
 }
 
 seed["overigVermogen"] = {
-    "aandelenPaytWaarde": aandelen_payt_waarde,
     "huisWaarde": huis_waarde,
     "hypotheek": hypotheek,
     "overwaardeAandeel": overwaarde_aandeel,
@@ -147,6 +146,7 @@ for row in range(2, 6):
             "aantal": float(cell(aandelen, row, 2) or 0),
             "inleg": float(cell(aandelen, row, 5) or 0),
             "dividend": float(cell(aandelen, row, 10) or 0),
+            "vanJou": naam == "Bert-Jan",
         }
     )
 

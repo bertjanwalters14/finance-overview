@@ -43,11 +43,12 @@ export function AandelenForm({ data }: { data: AandelenPaytData }) {
               <th className="pr-2 pb-2">Waarde</th>
               <th className="pr-2 pb-2">Rendement</th>
               <th className="pr-2 pb-2">Dividend</th>
+              <th className="pr-2 pb-2">Van jou</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
-            {rijen.map((r) => {
+            {rijen.map((r, i) => {
               const waarde = r.aantal * koers;
               const rendement = r.inleg > 0 ? waarde / r.inleg : 0;
               return (
@@ -98,6 +99,14 @@ export function AandelenForm({ data }: { data: AandelenPaytData }) {
                       className={`${inputClass} w-24 py-1`}
                     />
                   </td>
+                  <td className="py-1 pr-2 text-center">
+                    <input
+                      name={`vanJou_${i}`}
+                      type="checkbox"
+                      defaultChecked={r.vanJou}
+                      className="h-4 w-4"
+                    />
+                  </td>
                   <td className="py-1">
                     <button
                       type="button"
@@ -128,6 +137,7 @@ export function AandelenForm({ data }: { data: AandelenPaytData }) {
               aantal: 0,
               inleg: 0,
               dividend: 0,
+              vanJou: false,
             },
           ])
         }

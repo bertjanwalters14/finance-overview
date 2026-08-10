@@ -10,11 +10,6 @@ export function OverigVermogenForm({ data }: { data: OverigVermogen | null }) {
     <form action={saveOverigVermogen} className="flex flex-col gap-4">
       <div className="grid gap-4 sm:grid-cols-2">
         <Field
-          label="Payt aandelen waarde"
-          name="aandelenPaytWaarde"
-          defaultValue={data?.aandelenPaytWaarde}
-        />
-        <Field
           label="Overwaarde (jouw deel)"
           name="overwaardeAandeel"
           defaultValue={data?.overwaardeAandeel}

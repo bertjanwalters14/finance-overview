@@ -428,7 +428,6 @@
     "belegging": 12292.0
   },
   "overigVermogen": {
-    "aandelenPaytWaarde": 130082.75,
     "huisWaarde": 825000.0,
     "hypotheek": 475000.0,
     "overwaardeAandeel": 175000.0,
@@ -442,25 +441,29 @@
         "naam": "Bert-Jan",
         "aantal": 14063.0,
         "inleg": 20712.5,
-        "dividend": 9003.75
+        "dividend": 9003.75,
+        "vanJou": true
       },
       {
         "naam": "Mirte",
         "aantal": 14062.0,
         "inleg": 21275.0,
-        "dividend": 0.0
+        "dividend": 0.0,
+        "vanJou": false
       },
       {
         "naam": "Geert",
         "aantal": 8125.0,
         "inleg": 13200.0,
-        "dividend": 3472.875
+        "dividend": 3472.875,
+        "vanJou": false
       },
       {
         "naam": "Annelies",
         "aantal": 500.0,
         "inleg": 2250.0,
-        "dividend": 514.5
+        "dividend": 514.5,
+        "vanJou": false
       }
     ]
   },

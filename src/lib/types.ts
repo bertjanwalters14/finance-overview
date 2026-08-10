@@ -27,10 +27,11 @@ export function besteedbaarVermogenTotaal(b: BesteedbaarVermogen): number {
   return b.spaarrekening + b.belegging
 }
 
-// Overig vermogen (huis, hypotheek, Payt-aandelen, schuld) verandert zelden,
-// dus dit is één losse "huidige stand" zonder historie.
+// Overig vermogen (huis, hypotheek, schuld) verandert zelden, dus dit is één
+// losse "huidige stand" zonder historie. Payt-aandelenwaarde staat hier
+// bewust niet in — die wordt live berekend vanuit de aandelen-data, zodat
+// een koerswijziging daar automatisch doorwerkt in het eigen vermogen.
 export interface OverigVermogen {
-  aandelenPaytWaarde: number
   huisWaarde: number
   hypotheek: number
   // Jouw deel in de overwaarde van het huis (bv. bij gedeeld eigendom is dit
@@ -42,11 +43,12 @@ export interface OverigVermogen {
 
 export function berekenEigenVermogen(
   besteedbaar: BesteedbaarVermogen,
-  overig: OverigVermogen
+  overig: OverigVermogen,
+  aandelenPaytWaarde: number
 ): number {
   return (
     besteedbaarVermogenTotaal(besteedbaar) +
-    overig.aandelenPaytWaarde +
+    aandelenPaytWaarde +
     overig.overwaardeAandeel -
     overig.schuld
   )
@@ -57,6 +59,8 @@ export interface AandeelhouderPayt {
   aantal: number
   inleg: number
   dividend: number
+  // Telt dit mee in jouw eigen vermogen (dashboard/vermogen-pagina)?
+  vanJou: boolean
 }
 
 export interface AandelenPaytData {
@@ -78,6 +82,13 @@ export function berekenRendement(
 ): number {
   if (a.inleg === 0) return 0
   return berekenAandelenWaarde(a, koersPerAandeel) / a.inleg
+}
+
+// Som van de waarde van alle aandeelhouders die als "van jou" zijn gemarkeerd.
+export function berekenEigenAandelenWaarde(data: AandelenPaytData): number {
+  return data.aandeelhouders
+    .filter((a) => a.vanJou)
+    .reduce((s, a) => s + berekenAandelenWaarde(a, data.koersPerAandeel), 0)
 }
 
 export interface LoonEntry {

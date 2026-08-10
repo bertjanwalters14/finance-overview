@@ -1,10 +1,16 @@
+import Link from "next/link";
 import {
   getLaatsteBesteedbaarVermogen,
   getOverigVermogen,
+  getAandelenPayt,
   listBesteedbaarVermogenGeschiedenis,
 } from "@/lib/data";
-import { berekenEigenVermogen, besteedbaarVermogenTotaal } from "@/lib/types";
-import { formatEUR } from "@/lib/format";
+import {
+  berekenEigenVermogen,
+  berekenEigenAandelenWaarde,
+  besteedbaarVermogenTotaal,
+} from "@/lib/types";
+import { formatEUR, formatEURPrecies } from "@/lib/format";
 import { Card } from "@/components/Card";
 import { ExportLink } from "@/components/ExportLink";
 import { BesteedbaarVermogenForm } from "./BesteedbaarVermogenForm";
@@ -12,11 +18,15 @@ import { OverigVermogenForm } from "./OverigVermogenForm";
 import { VermogenChart } from "./VermogenChart";
 
 export default async function VermogenPage() {
-  const [laatsteBesteedbaar, overig, geschiedenis] = await Promise.all([
-    getLaatsteBesteedbaarVermogen(),
-    getOverigVermogen(),
-    listBesteedbaarVermogenGeschiedenis(),
-  ]);
+  const [laatsteBesteedbaar, overig, aandelen, geschiedenis] =
+    await Promise.all([
+      getLaatsteBesteedbaarVermogen(),
+      getOverigVermogen(),
+      getAandelenPayt(),
+      listBesteedbaarVermogenGeschiedenis(),
+    ]);
+
+  const aandelenPaytWaarde = berekenEigenAandelenWaarde(aandelen);
 
   return (
     <div className="flex flex-col gap-6">
@@ -29,7 +39,9 @@ export default async function VermogenPage() {
         <Card>
           <p className="text-sm text-slate-400">Huidig eigen vermogen</p>
           <p className="text-3xl font-semibold text-white">
-            {formatEUR(berekenEigenVermogen(laatsteBesteedbaar, overig))}
+            {formatEUR(
+              berekenEigenVermogen(laatsteBesteedbaar, overig, aandelenPaytWaarde)
+            )}
           </p>
         </Card>
       )}
@@ -60,9 +72,15 @@ export default async function VermogenPage() {
         <BesteedbaarVermogenForm data={laatsteBesteedbaar} />
       </Card>
 
-      <Card title="Overig vermogen (huis, hypotheek, aandelen, schuld)">
+      <Card title="Overig vermogen (huis, hypotheek, schuld)">
         <p className="mb-4 text-sm text-slate-500">
           Verandert zelden — pas aan wanneer de werkelijke stand echt wijzigt.
+          Payt aandelen ({formatEURPrecies(aandelenPaytWaarde)}) tel je hier
+          niet los in — die waarde komt automatisch mee vanuit de{" "}
+          <Link href="/aandelen" className="text-emerald-400 hover:underline">
+            Aandelen-pagina
+          </Link>
+          .
         </p>
         <OverigVermogenForm data={overig} />
       </Card>

@@ -1,14 +1,20 @@
 import {
   listBesteedbaarVermogenGeschiedenis,
   getOverigVermogen,
+  getAandelenPayt,
 } from "@/lib/data";
-import { MAAND_NAMEN, besteedbaarVermogenTotaal } from "@/lib/types";
+import {
+  MAAND_NAMEN,
+  besteedbaarVermogenTotaal,
+  berekenEigenAandelenWaarde,
+} from "@/lib/types";
 import { toCsv, csvResponse } from "@/lib/csv";
 
 export async function GET() {
-  const [geschiedenis, overig] = await Promise.all([
+  const [geschiedenis, overig, aandelen] = await Promise.all([
     listBesteedbaarVermogenGeschiedenis(),
     getOverigVermogen(),
+    getAandelenPayt(),
   ]);
 
   const headers = [
@@ -35,7 +41,7 @@ export async function GET() {
       toCsv(
         ["Overig vermogen (huidige stand)", "Bedrag"],
         [
-          ["Payt aandelen waarde", overig.aandelenPaytWaarde],
+          ["Payt aandelen waarde", berekenEigenAandelenWaarde(aandelen)],
           ["Huiswaarde", overig.huisWaarde],
           ["Hypotheek", overig.hypotheek],
           ["Overwaarde (jouw deel)", overig.overwaardeAandeel],

@@ -1,10 +1,15 @@
 import {
   getLaatsteBesteedbaarVermogen,
   getOverigVermogen,
+  getAandelenPayt,
   getMaand,
   getDoelen,
 } from "@/lib/data";
-import { berekenEigenVermogen, MAAND_NAMEN } from "@/lib/types";
+import {
+  berekenEigenVermogen,
+  berekenEigenAandelenWaarde,
+  MAAND_NAMEN,
+} from "@/lib/types";
 import { formatEUR, formatEURPrecies } from "@/lib/format";
 import { Card } from "@/components/Card";
 
@@ -13,15 +18,19 @@ export default async function DashboardPage() {
   const jaar = nu.getFullYear();
   const maandNr = nu.getMonth() + 1;
 
-  const [besteedbaar, overig, maand, doelen] = await Promise.all([
+  const [besteedbaar, overig, aandelen, maand, doelen] = await Promise.all([
     getLaatsteBesteedbaarVermogen(),
     getOverigVermogen(),
+    getAandelenPayt(),
     getMaand(jaar, maandNr),
     getDoelen(jaar),
   ]);
 
+  const aandelenPaytWaarde = berekenEigenAandelenWaarde(aandelen);
   const eigenVermogen =
-    besteedbaar && overig ? berekenEigenVermogen(besteedbaar, overig) : null;
+    besteedbaar && overig
+      ? berekenEigenVermogen(besteedbaar, overig, aandelenPaytWaarde)
+      : null;
 
   const vasteLastenTotaal =
     maand?.vasteLasten.reduce((s, v) => s + v.bedrag, 0) ?? 0;
@@ -47,7 +56,7 @@ export default async function DashboardPage() {
               <dl className="space-y-1 text-sm">
                 <Row label="Spaarrekening" value={besteedbaar.spaarrekening} />
                 <Row label="Belegging" value={besteedbaar.belegging} />
-                <Row label="Payt aandelen" value={overig.aandelenPaytWaarde} />
+                <Row label="Payt aandelen" value={aandelenPaytWaarde} />
                 <Row
                   label="Overwaarde (jouw deel)"
                   value={overig.overwaardeAandeel}

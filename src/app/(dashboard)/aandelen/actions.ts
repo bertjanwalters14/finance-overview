@@ -17,6 +17,7 @@ export async function saveAandelen(formData: FormData): Promise<void> {
       aantal: Number(aantallen[i] || 0),
       inleg: Number(inlegen[i] || 0),
       dividend: Number(dividenden[i] || 0),
+      vanJou: formData.get(`vanJou_${i}`) === "on",
     }))
     .filter((a) => a.naam.length > 0);
 

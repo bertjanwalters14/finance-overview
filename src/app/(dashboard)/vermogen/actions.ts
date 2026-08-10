@@ -23,7 +23,6 @@ export async function saveBesteedbaarVermogen(
 
 export async function saveOverigVermogen(formData: FormData): Promise<void> {
   const data: OverigVermogen = {
-    aandelenPaytWaarde: Number(formData.get("aandelenPaytWaarde") || 0),
     huisWaarde: Number(formData.get("huisWaarde") || 0),
     hypotheek: Number(formData.get("hypotheek") || 0),
     overwaardeAandeel: Number(formData.get("overwaardeAandeel") || 0),
