@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { saveDoelen } from "./actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { inputClass } from "@/components/formStyles";
+import { formatEURPrecies } from "@/lib/format";
 import { MAAND_NAMEN } from "@/lib/types";
 import type { JaarDoelen, DoelCategorie } from "@/lib/types";
 
@@ -12,9 +14,13 @@ type CategorieMetId = DoelCategorie & { id: string };
 export function DoelenForm({
   jaar,
   data,
+  alleenLezenKolommen = false,
+  beleggingPerMaand,
 }: {
   jaar: number;
   data: JaarDoelen | null;
+  alleenLezenKolommen?: boolean;
+  beleggingPerMaand?: number[];
 }) {
   const [categorieen, setCategorieen] = useState<CategorieMetId[]>(() =>
     (data?.categorieen ?? []).map((c) => ({ ...c, id: crypto.randomUUID() }))
@@ -25,6 +31,19 @@ export function DoelenForm({
       <input type="hidden" name="jaar" value={jaar} />
       <input type="hidden" name="catCount" value={categorieen.length} />
 
+      {alleenLezenKolommen && (
+        <p className="text-sm text-slate-500">
+          Doel, werkelijk gespaard en belegging komen uit het{" "}
+          <Link
+            href="/maandoverzicht"
+            className="text-emerald-400 hover:underline"
+          >
+            Maandoverzicht
+          </Link>{" "}
+          — bewerk ze daar. Overige categorieën blijven hier bewerkbaar.
+        </p>
+      )}
+
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -32,6 +51,9 @@ export function DoelenForm({
               <th className="pr-2 pb-2">Maand</th>
               <th className="pr-2 pb-2">Doel</th>
               <th className="pr-2 pb-2">Werkelijk</th>
+              {alleenLezenKolommen && beleggingPerMaand && (
+                <th className="pr-2 pb-2">Belegging</th>
+              )}
               {categorieen.map((c, ci) => (
                 <th key={c.id} className="pr-2 pb-2">
                   <div className="flex items-center gap-1">
@@ -64,23 +86,40 @@ export function DoelenForm({
                   {naam}
                 </td>
                 <td className="py-1 pr-2">
-                  <input
-                    type="number"
-                    step="0.01"
-                    name="doelMaand"
-                    defaultValue={data?.doelPerMaand[mi] ?? 0}
-                    className={`${inputClass} w-24 py-1`}
-                  />
+                  {alleenLezenKolommen ? (
+                    <span className="text-slate-300">
+                      {formatEURPrecies(data?.doelPerMaand[mi] ?? 0)}
+                    </span>
+                  ) : (
+                    <input
+                      type="number"
+                      step="0.01"
+                      name="doelMaand"
+                      defaultValue={data?.doelPerMaand[mi] ?? 0}
+                      className={`${inputClass} w-24 py-1`}
+                    />
+                  )}
                 </td>
                 <td className="py-1 pr-2">
-                  <input
-                    type="number"
-                    step="0.01"
-                    name="werkelijkMaand"
-                    defaultValue={data?.werkelijkPerMaand[mi] ?? 0}
-                    className={`${inputClass} w-24 py-1`}
-                  />
+                  {alleenLezenKolommen ? (
+                    <span className="text-slate-300">
+                      {formatEURPrecies(data?.werkelijkPerMaand[mi] ?? 0)}
+                    </span>
+                  ) : (
+                    <input
+                      type="number"
+                      step="0.01"
+                      name="werkelijkMaand"
+                      defaultValue={data?.werkelijkPerMaand[mi] ?? 0}
+                      className={`${inputClass} w-24 py-1`}
+                    />
+                  )}
                 </td>
+                {alleenLezenKolommen && beleggingPerMaand && (
+                  <td className="py-1 pr-2 text-slate-300">
+                    {formatEURPrecies(beleggingPerMaand[mi] ?? 0)}
+                  </td>
+                )}
                 {categorieen.map((c, ci) => (
                   <td key={c.id} className="py-1 pr-2">
                     <input

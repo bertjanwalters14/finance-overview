@@ -4,7 +4,12 @@ import {
   listMaandenVanJaar,
   listBesteedbaarVermogenGeschiedenis,
 } from "@/lib/data";
-import { besteedbaarVermogenTotaal, vasteLastenTotaal } from "@/lib/types";
+import {
+  besteedbaarVermogenTotaal,
+  vasteLastenTotaal,
+  afgeleideDoelenUitMaanden,
+} from "@/lib/types";
+import type { JaarDoelen } from "@/lib/types";
 import { Card } from "@/components/Card";
 import { Tabs } from "@/components/Tabs";
 import { YearSwitcher } from "@/components/YearSwitcher";
@@ -59,29 +64,42 @@ async function JarenVergelekenTab() {
         listMaandenVanJaar(jaar),
       ]);
 
-      const doelTotaal = doelen?.doelPerMaand.reduce((a, b) => a + b, 0) ?? 0;
+      const heeftMaandData = maanden.length > 0;
+      // Voor jaren met maandoverzicht-data zijn Doel/Werkelijk al bekend uit
+      // de Maand-records (zie /maandoverzicht) — die zijn dan leidend, niet
+      // de (mogelijk verouderde) los opgeslagen JaarDoelen-cijfers.
+      const afgeleid = heeftMaandData
+        ? afgeleideDoelenUitMaanden(maanden)
+        : null;
 
-      const inkomstenTotaal =
-        maanden.length > 0
-          ? maanden.reduce((s, m) => s + m.loon + m.overigeInkomsten, 0)
-          : null;
+      const doelTotaal = afgeleid
+        ? afgeleid.doelPerMaand.reduce((a, b) => a + b, 0)
+        : doelen?.doelPerMaand.reduce((a, b) => a + b, 0) ?? 0;
+
+      const inkomstenTotaal = heeftMaandData
+        ? maanden.reduce((s, m) => s + m.loon + m.overigeInkomsten, 0)
+        : null;
+
+      const sparenTotaal = afgeleid
+        ? afgeleid.werkelijkPerMaand.reduce((a, b) => a + b, 0)
+        : doelen?.werkelijkPerMaand.reduce((a, b) => a + b, 0) ?? 0;
 
       // "Werkelijk gespaard" is sparen + alle categorieën samen (belegging,
-      // vakantie, etc.) — voor jaren zónder maandoverzicht-data komen die
-      // categorieën uit apart bijgehouden potjes, dus die tellen echt mee.
-      // Voor jaren MET maandoverzicht-data (nu: 2026) komt "Belegging" uit
-      // dezelfde pot als het sparen-doel (bv. automatisch beleggen vanuit
-      // je spaarrekening bij Trade Republic) — dan niet nog eens optellen.
-      const categorieenTotaal =
-        maanden.length > 0
-          ? 0
-          : doelen?.categorieen.reduce(
-              (s, c) => s + c.bedragenPerMaand.reduce((a, b) => a + b, 0),
-              0
-            ) ?? 0;
+      // vakantie, etc.), behalve voor jaren MET maandoverzicht-data: daar
+      // komt "Belegging" uit dezelfde pot als het sparen-doel (bv.
+      // automatisch beleggen vanuit je spaarrekening bij Trade Republic),
+      // dus die telt dan niet nog eens los mee. Overige categorieën
+      // (bv. Vakantie) tellen wél altijd mee, ook in maandoverzicht-jaren.
+      const categorieenOverigTotaal = (doelen?.categorieen ?? [])
+        .filter((c) => c.naam.trim().toLowerCase() !== "belegging")
+        .reduce((s, c) => s + c.bedragenPerMaand.reduce((a, b) => a + b, 0), 0);
+      const beleggingTotaal = heeftMaandData
+        ? 0
+        : doelen?.categorieen
+            .find((c) => c.naam.trim().toLowerCase() === "belegging")
+            ?.bedragenPerMaand.reduce((a, b) => a + b, 0) ?? 0;
       const werkelijkTotaal =
-        (doelen?.werkelijkPerMaand.reduce((a, b) => a + b, 0) ?? 0) +
-        categorieenTotaal;
+        sparenTotaal + categorieenOverigTotaal + beleggingTotaal;
       const vasteLastenSom =
         maanden.length > 0
           ? maanden.reduce((s, m) => s + vasteLastenTotaal(m), 0)
@@ -178,14 +196,30 @@ async function PerMaandTab({ jaarParam }: { jaarParam?: string }) {
   const nu = new Date();
   const jaar = Number(jaarParam) || nu.getFullYear();
 
-  const [doelen, beschikbareJaren] = await Promise.all([
+  const [doelen, beschikbareJaren, maanden] = await Promise.all([
     getDoelen(jaar),
     listDoelenJaren(),
+    listMaandenVanJaar(jaar),
   ]);
 
   const jaren = Array.from(
     new Set([...beschikbareJaren, nu.getFullYear(), nu.getFullYear() + 1])
   ).sort((a, b) => b - a);
+
+  const heeftMaandData = maanden.length > 0;
+  const afgeleid = heeftMaandData ? afgeleideDoelenUitMaanden(maanden) : null;
+
+  const doelenEffectief: JaarDoelen = {
+    jaar,
+    doelPerMaand: afgeleid?.doelPerMaand ?? doelen?.doelPerMaand ?? Array(12).fill(0),
+    werkelijkPerMaand:
+      afgeleid?.werkelijkPerMaand ?? doelen?.werkelijkPerMaand ?? Array(12).fill(0),
+    categorieen: heeftMaandData
+      ? (doelen?.categorieen ?? []).filter(
+          (c) => c.naam.trim().toLowerCase() !== "belegging"
+        )
+      : doelen?.categorieen ?? [],
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -203,13 +237,18 @@ async function PerMaandTab({ jaarParam }: { jaarParam?: string }) {
 
       <Card title={`Doel vs werkelijk ${jaar}`}>
         <DoelenChart
-          doelPerMaand={doelen?.doelPerMaand ?? Array(12).fill(0)}
-          werkelijkPerMaand={doelen?.werkelijkPerMaand ?? Array(12).fill(0)}
+          doelPerMaand={doelenEffectief.doelPerMaand}
+          werkelijkPerMaand={doelenEffectief.werkelijkPerMaand}
         />
       </Card>
 
       <Card title={`Doelen ${jaar} bewerken`}>
-        <DoelenForm jaar={jaar} data={doelen} />
+        <DoelenForm
+          jaar={jaar}
+          data={doelenEffectief}
+          alleenLezenKolommen={heeftMaandData}
+          beleggingPerMaand={afgeleid?.beleggingPerMaand}
+        />
       </Card>
     </div>
   );

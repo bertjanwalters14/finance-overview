@@ -174,6 +174,26 @@ export interface JaarDoelen {
   categorieen: DoelCategorie[]
 }
 
+// Voor een jaar waarin je het maandoverzicht bijhoudt, zijn Doel/Werkelijk/
+// Belegging al bekend uit de Maand-records — die hoeven dan niet nog eens
+// los in JaarDoelen ingevuld te worden. Dit leidt ze live af, zodat er maar
+// één bron van waarheid is.
+export function afgeleideDoelenUitMaanden(maanden: Maand[]): {
+  doelPerMaand: number[]
+  werkelijkPerMaand: number[]
+  beleggingPerMaand: number[]
+} {
+  const doelPerMaand = Array(12).fill(0)
+  const werkelijkPerMaand = Array(12).fill(0)
+  const beleggingPerMaand = Array(12).fill(0)
+  for (const m of maanden) {
+    doelPerMaand[m.maand - 1] = m.doelSparen
+    werkelijkPerMaand[m.maand - 1] = m.werkelijkGespaard
+    beleggingPerMaand[m.maand - 1] = m.beleggingInleg
+  }
+  return { doelPerMaand, werkelijkPerMaand, beleggingPerMaand }
+}
+
 export const MAAND_NAMEN = [
   'Januari',
   'Februari',
